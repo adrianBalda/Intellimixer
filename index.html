@@ -1,41 +1,160 @@
-<!doctype html>
-<html class="no-js" lang="">
-
+<html>
 <head>
-  <meta charset="utf-8">
-  <title></title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <meta property="og:title" content="">
-  <meta property="og:type" content="">
-  <meta property="og:url" content="">
-  <meta property="og:image" content="">
-
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
-  <!-- Place favicon.ico in the root directory -->
-
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/main.css">
-
-  <meta name="theme-color" content="#fafafa">
+    <meta charset="UTF-8">
+    <title>Timbral Searching</title>
+    <link rel="stylesheet" type="text/css" href="css/all.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,500' rel='stylesheet' type='text/css'>
 </head>
+<body onload="start();">
+<canvas></canvas>
 
-<body>
+<div id="query_box" class="box">
+    <form id="query-form" class="query-form">
+        <!--<input id="query_terms_input" type="text" placeholder="BlogPostDemo.json">-->
+        <!--<input type="submit" id="go_button" value="Go!">-->
+        <p>Select x-axis attribute</p>
+        <select id="x_axis_map_descriptors_selector" onchange="start()">
+            <option value="timbre.brightness">Brightness</option>
+            <option value="timbre.hardness">Hardness</option>
+            <option value="timbre.depth">Depth</option>
+            <option value="timbre.roughness">Roughness</option>
+            <option value="timbre.warmth">Warmth</option>
+            <option value="timbre.sharpness">Sharpness</option>
+            <option value="timbre.boominess">Boominess</option>
+        </select>
+        <p><br>Select y-axis attribute</p>
+        <select id="y_axis_map_descriptors_selector" onchange="start()">
+            <option value="timbre.brightness">Brightness</option>
+            <option value="timbre.hardness">Hardness</option>
+            <option value="timbre.depth">Depth</option>
+            <option value="timbre.roughness">Roughness</option>
+            <option value="timbre.warmth">Warmth</option>
+            <option value="timbre.sharpness">Sharpness</option>
+            <option value="timbre.boominess">Boominess</option>
+        </select>
+        <p><br>Select source to display</p>
+        <select id="source_selector" onchange="start()">
+            <option value="all">- Show all sources</option>
+            <!-- sfx -->
+            <option value="-bang-doorclose-explosion-boom-footsteps-impact-knock-punch-rumble-slap-swoosh-tap-thud-thump-whoosh">
+                - Sound effects
+            </option>
+            <option value="bang">Bang</option>
+            <option value="doorclose">Door closing</option>
+            <option value="explosion">Explosion</option>
+            <option value="boom">Boom</option>
+            <option value="footsteps">Footsteps</option>
+            <option value="impact">Impact</option>
+            <option value="knock">Knock</option>
+            <option value="punch">Punch</option>
+            <option value="rumble">Rumble</option>
+            <option value="slap">Slap</option>
+            <option value="swoosh">Swoosh</option>
+            <option value="tap">Tap</option>
+            <option value="thud">Thud</option>
+            <option value="thump">Thump</option>
+            <option value="whoosh">Whoosh</option>
+            <!-- percussion-->
+            <option value="-beat-click-drum-hit-kick-snare">- Percussion</option>
+            <option value="beat">Beat</option>
+            <option value="click">Click</option>
+            <option value="drum">Drums</option>
+            <option value="hit">Hit</option>
+            <option value="kick">Kick</option>
+            <option value="snare">Snare</option>
+            <!-- electronic-->
+            <option value="-ambience-atmosphere-beep-pad-synth-tone">- Electronic</option>
+            <option value="ambience">Ambience</option>
+            <option value="atmosphere">Atmosphere</option>
+            <option value="beep">Beep</option>
+            <option value="pad">Pad</option>
+            <option value="synth">Synth</option>
+            <option value="tone">Tone</option>
+            <!-- environmental -->
+            <option value="-breeze-rain-thunder-wind">- Environment</option>
+            <option value="breeze">Breeze</option>
+            <option value="rain">Rain</option>
+            <option value="thunder">Thunder</option>
+            <option value="wind">Wind</option>
+            <!-- instruments -->
+            <option value="-bass-bell-chime-gong-guitar-horn-piano">- Instruments</option>
+            <option value="bass">Bass</option>
+            <option value="bell">Bell</option>
+            <option value="chime">Chime</option>
+            <option value="gong">Gong</option>
+            <option value="guitar">Guitar</option>
+            <option value="horn">Horn</option>
+            <option value="piano">Piano</option>
+            <!-- human noises -->
+            <option value="-breathing-crying-laugh-scream-talking-voice">-Human sounds</option>
+            <option value="breathing">Breathing</option>
+            <option value="crying">Crying</option>
+            <option value="laugh">Laugh</option>
+            <option value="scream">Scream</option>
+            <option value="talking">Talking</option>
+            <option value="voice">Voice</option>
+            <!-- misc -->
+            <option value="-chord-drone-drone-hum-music-noise-sound">- Miscellaneous</option>
+            <option value="chord">Chord</option>
+            <option value="drone">Drone</option>
+            <option value="hum">Hum</option>
+            <option value="music">Music</option>
+            <option value="noise">Noise</option>
+            <option value="sound">Sound</option>
 
-  <!-- Add your site or application content here -->
-  <p>Hello world! This is HTML5 Boilerplate.</p>
-  <script src="js/vendor/modernizr-3.11.2.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/main.js"></script>
+            <!--<option value="xy&timbre.hardness&timbre.depth">Hardness + Depth</option>-->
+            <!--<option value="tsne&lowlevel.mfcc.mean">MFCC (similarity)</option>-->
+        </select>
+        <p><br>Select reverberant stimuli</p>
+        <select id="reverb_selector" onchange="start()">
+            <option value="all">Show all sounds</option>
+            <option value="2:H">Reverberant sounds only</option>
+            <option value="1:L">Non-reverberant sounds only</option>
+        </select>
+    </form>
+    <div id="info_placeholder"></div>
+    <div>
+        <label class="switch" onchange="start()">
+            <input type="checkbox" id="myonoffswitch">
+            <span class="slider round">freesound api</span>
+        </label>
+    </div>
+    <div>
+        <input type="file" id="upload-json"/>
+        <input type="file" id="upload-weights" multiple="multiple"/>
+        <button onclick="getModels()">Confirmar</button>
+    </div>
+</div>
 
-  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
-  <script>
-    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set', 'anonymizeIp', true); ga('set', 'transport', 'beacon'); ga('send', 'pageview')
-  </script>
-  <script src="https://www.google-analytics.com/analytics.js" async></script>
+<div id="instructions_box" class="box">
+    Click on points to listen to sounds<br>
+    Click + drag to navigate the map<br>
+    Scroll wheel to zoom<br>
+</div>
+
+<div id="x_axis_box" class="box">
+
+</div>
+
+<div id="y_axis_box" class="box">
+
+</div>
+
+<div id="sound_info_box" class="box">
+</div>
+
+<div id="logo_box" class="box">
+    TIMBRAL EXPLORER <!--SOUND MAP VISUALIZER-->
+</div>
+
+<!-- javascript loading must be at the end -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+<script src="js/inputevents.js"></script>
+<script src="js/audioengine.js"></script>
+<script src="js/tsne.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/all.js"></script>
+
+
 </body>
-
 </html>
