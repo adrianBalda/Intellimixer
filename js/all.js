@@ -4,10 +4,12 @@
 var audio_manager = new AudioManager();
 var MONO_MODE = true;
 let model
+let sampleValuesInLatentSpace
+let a
 
 // Sounds and content
 var default_query = "files/BlogPostDemo.json"
-var default_audio_query = "files/audio.json"
+var default_audio_query = "files/audio2d.json"
 var default_audio = []
 var default_query_model = "files/model/model.json"
 var sounds = [];
@@ -54,39 +56,103 @@ async function getModels() {
         [uploadJSONInput.files[0], uploadWeightsInput.files[0]]));
 }
 
+function sampleFromLatentSpace(mu, log_variance) {
+    let epsilon = jStat.normal.sample(0, 1);
+    return mu + Math.exp(log_variance / 2) * epsilon;
+}
+
+function mclt(x, odd=true) {
+    let N = Math.floor(x.length / 2);
+    let n0 = (N +1) / 2;
+    let pre_twiddle = [];
+    let offset = 0;
+    let outlen = 0;
+    if (odd) {
+        outlen = N;
+        for (let i=0; i<N*2; i++) {
+            pre_twiddle.push(math.exp(math.complex(0, -1 * math.pi * i / (N * 2))));
+        }
+        offset = 0.5;
+    } else {
+        outlen = N + 1;
+        pre_twiddle = 1.0;
+        offset = 0.0;
+    }
+    let post_twiddle = [];
+    for (let i=0; i<outlen; i++) {
+        post_twiddle.push(math.exp(math.complex(0, -1 * math.pi * n0 * (i + offset) / N)));
+    }
+
+    X = []
+    for (let k=0; k<outlen; k++) {
+        for (let i=0; i<x.length; i++) {
+            X[k] = math.multiply(math.multiply(x, pre_twiddle), math.exp(math.complex(0, -2 * math.pi * k * i / x.length)))
+        }
+    }
+
+    if (!odd) {
+        X[0] *= math.sqrt(0.5);
+        X[X.lenght-1] *= math.sqrt(0.5);
+    }
+
+    return math.multiply(math.multiply(X, post_twiddle), math.sqrt(1 / N));
+}
+
 async function start() {
 
     // Leer audio por defecto para pruebas
     loadJSON(function (data) {
-            default_audio = JSON.parse(data)
-        }, default_audio_query);
+        default_audio = JSON.parse(data)
+    }, default_audio_query);
 
-    class GaussianDistribution extends tf.layers.Layer {
-        constructor(latent_space_dim) {
-            super({});
-            this.latent_space_dim = latent_space_dim;
-        }
+    // class GaussianDistribution extends tf.layers.Layer {
+    //     constructor(latent_space_dim) {
+    //         super({});
+    //         this.latent_space_dim = latent_space_dim;
+    //     }
+    //
+    //     call(inputs) {
+    //         let mu = inputs[0];
+    //         console.log(mu)
+    //         let log_variance = inputs[1];
+    //         console.log(log_variance)
+    //         let epsilon = tf.randomNormal([1, this.latent_space_dim.latentSpaceDim], 0, 1, 'float32');
+    //         console.log(epsilon)
+    //         let sampled_point = mu.add(log_variance.div(tf.scalar(2)).exp().mul(epsilon));
+    //         console.log(sampled_point.cast('float32'))
+    //         //console.log(tf.tensor(sampled_point).toFloat())
+    //
+    //         return sampled_point;
+    //     }
+    //
+    //     static get className() {
+    //         return 'GaussianDistribution';
+    //     }
+    // }
 
-        async call(inputs) {
-            let mu = inputs[0];
-            let log_variance = inputs[1];
-            let epsilon = tf.randomNormal([this.latent_space_dim,], 0, 1);
-            let sampled_point = mu + tf.exp(log_variance / 2) * epsilon;
-            return sampled_point;
-        }
+    // tf.serialization.registerClass(GaussianDistribution);
 
-        static get className() {
-            return 'GaussianDistribution';
-        }
+    encoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
+    decoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
+
+    let tensor = tf.tensor2d(default_audio, [512, 64], 'float32')
+    let [mu_tensor, log_variance_tensor] = encoder_model.predict(tf.reshape(tensor, shape = [1, 512, 64, 1]));
+    let mu_latent_space = mu_tensor.dataSync();
+    let log_variance_latent_space = log_variance_tensor.dataSync();
+    let latent_space_size = mu_latent_space.length;
+
+    sampleValuesInLatentSpace = []
+    for (let i=0; i < latent_space_size; i++) {
+         sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
     }
 
-    tf.serialization.registerClass(GaussianDistribution);
+    let decoder_tensor = tf.tensor(sampleValuesInLatentSpace, [latent_space_size], 'float32');
+    let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
+    let predicted_spectrogram = await predicted_spectogram_tensor.array()
+    predicted_spectrogram = predicted_spectrogram[0]
 
-    model = await tf.loadLayersModel('https://models.seamosrealistas.com/models/model.json');
 
 
-
-    console.log(model)
 
 
     //const model = tf.sequential();
