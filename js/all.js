@@ -61,15 +61,50 @@ function sampleFromLatentSpace(mu, log_variance) {
     return mu + Math.exp(log_variance / 2) * epsilon;
 }
 
-function mclt(x, odd=true) {
+function windowCosineMateo(bufferSize, type = "hamming") {
+    windowValues = []
+    for (let i = 0; i < bufferSize; i++) {
+        windowValues[i] = Math.sin(Math.PI / 1024 * (i + 0.5));
+    }
+    return windowValues;
+}
+
+function centerPad(data, framelength) {
+    let zerosArray = Array(framelength / 2).fill(0);
+    return zerosArray.concat(data).concat(zerosArray)
+}
+
+function zeroPad(data, framelength) {
+    while (data.length % framelength !== 0) {
+        data.push(0);
+    }
+    return data;
+}
+
+function spectrogramMateo(data, framelength = 1024) {
+    let outlength = data.length;
+    let overlap = 2;
+    let hopsize = framelength / overlap;
+    let signal = data;
+
+    let centered = true;
+    if (centered) {
+        signal = centerPad(signal, framelength);
+    }
+    signal = zeroPad(signal, framelength);
+
+
+}
+
+function mclt(x, odd = true) {
     let N = Math.floor(x.length / 2);
-    let n0 = (N +1) / 2;
+    let n0 = (N + 1) / 2;
     let pre_twiddle = [];
     let offset = 0;
     let outlen = 0;
     if (odd) {
         outlen = N;
-        for (let i=0; i<N*2; i++) {
+        for (let i = 0; i < N * 2; i++) {
             pre_twiddle.push(math.exp(math.complex(0, -1 * math.pi * i / (N * 2))));
         }
         offset = 0.5;
@@ -79,23 +114,117 @@ function mclt(x, odd=true) {
         offset = 0.0;
     }
     let post_twiddle = [];
-    for (let i=0; i<outlen; i++) {
+    for (let i = 0; i < outlen; i++) {
         post_twiddle.push(math.exp(math.complex(0, -1 * math.pi * n0 * (i + offset) / N)));
     }
 
     X = []
-    for (let k=0; k<outlen; k++) {
-        for (let i=0; i<x.length; i++) {
-            X[k] = math.multiply(math.multiply(x, pre_twiddle), math.exp(math.complex(0, -2 * math.pi * k * i / x.length)))
+    aux_mul = math.dotMultiply(x, pre_twiddle);
+    for (let k = 0; k < N * 2; k++) {
+        aux_mul2 = -2 * math.pi * k / (N * 2);
+        X[k] = []
+        for (let ii = 0; ii < N * 2; ii++) {
+            X[k].push(math.dotMultiply(aux_mul[ii], math.exp(math.complex(0, aux_mul2 * ii))))
         }
+        X[k] = X[k].reduce((a, b) => math.add(a, b));
     }
 
     if (!odd) {
         X[0] *= math.sqrt(0.5);
-        X[X.lenght-1] *= math.sqrt(0.5);
+        X[X.lenght - 1] *= math.sqrt(0.5);
     }
 
-    return math.multiply(math.multiply(X, post_twiddle), math.sqrt(1 / N));
+    return math.dotMultiply(math.dotMultiply(X.slice(0, X.length / 2), post_twiddle), math.sqrt(1 / N));
+}
+
+function mclt_spectrogram(signal, fftPoints, hopLength) {
+
+}
+
+function FFTNayuki(n) {
+
+    this.n = n;
+    this.levels = -1;
+    for (var i = 0; i < 32; i++) {
+        if (1 << i == n) {
+            this.levels = i;  // Equal to log2(n)
+        }
+    }
+    if (this.levels == -1) {
+        throw "Length is not a power of 2";
+    }
+    this.cosTable = new Array(n / 2);
+    this.sinTable = new Array(n / 2);
+    for (var i = 0; i < n / 2; i++) {
+        this.cosTable[i] = Math.cos(2 * Math.PI * i / n);
+        this.sinTable[i] = Math.sin(2 * Math.PI * i / n);
+    }
+    /*
+     * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
+     * The vector's length must be equal to the size n that was passed to the object constructor, and this must be a power of 2. Uses the Cooley-Tukey decimation-in-time radix-2 algorithm.
+     */
+    this.forward = function (real, imag) {
+        var n = this.n;
+
+        // Bit-reversed addressing permutation
+        for (var i = 0; i < n; i++) {
+            var j = reverseBits(i, this.levels);
+            if (j > i) {
+                var temp = real[i];
+                real[i] = real[j];
+                real[j] = temp;
+                temp = imag[i];
+                imag[i] = imag[j];
+                imag[j] = temp;
+            }
+        }
+
+        // Cooley-Tukey decimation-in-time radix-2 FFT
+        for (var size = 2; size <= n; size *= 2) {
+            var halfsize = size / 2;
+            var tablestep = n / size;
+            for (var i = 0; i < n; i += size) {
+                for (var j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
+                    var tpre = real[j + halfsize] * this.cosTable[k] +
+                        imag[j + halfsize] * this.sinTable[k];
+                    var tpim = -real[j + halfsize] * this.sinTable[k] +
+                        imag[j + halfsize] * this.cosTable[k];
+                    real[j + halfsize] = real[j] - tpre;
+                    imag[j + halfsize] = imag[j] - tpim;
+                    real[j] += tpre;
+                    imag[j] += tpim;
+                }
+            }
+        }
+
+        // Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
+        function reverseBits(x, bits) {
+            var y = 0;
+            for (var i = 0; i < bits; i++) {
+                y = (y << 1) | (x & 1);
+                x >>>= 1;
+            }
+            return y;
+        }
+    }
+    /*
+     * Computes the inverse discrete Fourier transform (IDFT) of the given complex vector, storing the result back into the vector.
+     * The vector's length must be equal to the size n that was passed to the object constructor, and this must be a power of 2. This is a wrapper function. This transform does not perform scaling, so the inverse is not a true inverse.
+     */
+    this.inverse = function (real, imag) {
+        forward(imag, real);
+    }
+}
+
+
+function imclt(X, odd = true) {
+    if (!odd && X.length % 2 === 0) {
+        throw "Even inverse CMDCT requires an odd number of coefficients"
+    }
+
+    if (odd) {
+        N = X.length
+    }
 }
 
 async function start() {
@@ -142,17 +271,14 @@ async function start() {
     let latent_space_size = mu_latent_space.length;
 
     sampleValuesInLatentSpace = []
-    for (let i=0; i < latent_space_size; i++) {
-         sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
+    for (let i = 0; i < latent_space_size; i++) {
+        sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
     }
 
     let decoder_tensor = tf.tensor(sampleValuesInLatentSpace, [latent_space_size], 'float32');
     let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
     let predicted_spectrogram = await predicted_spectogram_tensor.array()
     predicted_spectrogram = predicted_spectrogram[0]
-
-
-
 
 
     //const model = tf.sequential();
