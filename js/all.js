@@ -81,6 +81,11 @@ function zeroPad(data, framelength) {
     return data;
 }
 
+function processSpectrogram(signalChunk, framelength) {
+    let data = math.dotMultiply(signalChunk, windowCosineMateo(framelength));
+    return mclt(data);
+}
+
 function spectrogramMateo(data, framelength = 1024) {
     let outlength = data.length;
     let overlap = 2;
@@ -93,7 +98,12 @@ function spectrogramMateo(data, framelength = 1024) {
     }
     signal = zeroPad(signal, framelength);
 
+    values = [];
+    for (let chunk = 0; chunk <= signal.length / hopsize; chunk++) {
+        values.push(processSpectrogram(signal.slice(chunk * hopsize, (chunk * hopsize) + framelength), framelength));
+    }
 
+    return values;
 }
 
 function mclt(x, odd = true) {
@@ -135,10 +145,6 @@ function mclt(x, odd = true) {
     }
 
     return math.dotMultiply(math.dotMultiply(X.slice(0, X.length / 2), post_twiddle), math.sqrt(1 / N));
-}
-
-function mclt_spectrogram(signal, fftPoints, hopLength) {
-
 }
 
 function FFTNayuki(n) {
@@ -230,9 +236,9 @@ function imclt(X, odd = true) {
 async function start() {
 
     // Leer audio por defecto para pruebas
-    loadJSON(function (data) {
-        default_audio = JSON.parse(data)
-    }, default_audio_query);
+    // loadJSON(function (data) {
+    //     default_audio = JSON.parse(data)
+    // }, default_audio_query);
 
     // class GaussianDistribution extends tf.layers.Layer {
     //     constructor(latent_space_dim) {
@@ -260,6 +266,13 @@ async function start() {
     // }
 
     // tf.serialization.registerClass(GaussianDistribution);
+
+    zz = []
+    for (let i = 0; i < 2071; i++) {
+        zz.push(i)
+    }
+
+    spectrogramMateo(zz)
 
     encoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
     decoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
