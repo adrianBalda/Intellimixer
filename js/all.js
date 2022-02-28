@@ -5,11 +5,10 @@ var audio_manager = new AudioManager();
 var MONO_MODE = true;
 let model
 let sampleValuesInLatentSpace
-let a
 
 // Sounds and content
 var default_query = "files/BlogPostDemo.json"
-var default_audio_query = "files/audio2d.json"
+var default_audio_query = "files/audioPrueba.json"
 var default_audio = []
 var default_query_model = "files/model/model.json"
 var sounds = [];
@@ -46,6 +45,8 @@ var zoom_factor = undefined;  // Set in start()
 var rotation_degrees = undefined;  // Set in start()
 var min_zoom = 0.2;
 var max_zoom = 15;
+const PI = Math.PI
+const PI2 = 2 * Math.PI
 
 /* Setup and app flow functions */
 
@@ -86,36 +87,72 @@ function processSpectrogram(signalChunk, framelength) {
     return mclt(data);
 }
 
-function spectrogramMateo(data, framelength = 1024) {
+function spectrogramMateo(data, framelength = 1024, centered = true) {
     let outlength = data.length;
     let overlap = 2;
     let hopsize = framelength / overlap;
     let signal = data;
 
-    let centered = true;
     if (centered) {
         signal = centerPad(signal, framelength);
     }
     signal = zeroPad(signal, framelength);
 
-    values = [];
-    for (let chunk = 0; chunk <= signal.length / hopsize; chunk++) {
+    let values = [];
+    let chunksSize = signal.length / hopsize - 1;
+    for (let chunk = 0; chunk < chunksSize; chunk++) {
         values.push(processSpectrogram(signal.slice(chunk * hopsize, (chunk * hopsize) + framelength), framelength));
     }
 
     return values;
 }
 
+// alv = []
+// for (let i=0; i<512; i++) {
+//     alv[i] = [];
+//     for (let j=0; j<64; j++) {
+//         alv[i].push(j*i)
+//     }}
+
+function ispectrogramMateo(data, framelength=1024, centered = true) {
+    let overlap = 2;
+    let hopsize = framelength / overlap;
+    let spectrogram = data;
+
+    let values = [];
+    let chunksSize = spectrogram.length;
+    for (let chunk = 0; chunk < chunksSize; chunk++) {
+        values.push(math.dotMultiply(imclt(spectrogram[chunk]), windowCosineMateo(framelength)));
+    }
+
+    result = []
+    for (let i = 0; i < values.length; i++) {
+        if (i == 0) {
+            result = result.concat(values[i].slice(0, values[i].length / 2));
+            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i+1].slice(0, values[i+1].length / 2)));
+        }
+        else if (i == values.length-1) {
+            result = result.concat(values[i].slice(values[i].length / 2, values[i].length));
+        } else {
+            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i+1].slice(0, values[i+1].length / 2)));
+        }
+    }
+
+    return result;
+}
+
 function mclt(x, odd = true) {
     let N = Math.floor(x.length / 2);
+    let N2 = N * 2;
     let n0 = (N + 1) / 2;
     let pre_twiddle = [];
     let offset = 0;
     let outlen = 0;
     if (odd) {
         outlen = N;
-        for (let i = 0; i < N * 2; i++) {
-            pre_twiddle.push(math.exp(math.complex(0, -1 * math.pi * i / (N * 2))));
+        let auxMul0 = -1 * math.pi / N2;
+        for (let i = 0; i < N2; i++) {
+            pre_twiddle.push(math.exp(math.complex(0, auxMul0 * i)));
         }
         offset = 0.5;
     } else {
@@ -124,174 +161,229 @@ function mclt(x, odd = true) {
         offset = 0.0;
     }
     let post_twiddle = [];
+    let auxMul1 = -1 * math.pi * n0 / N;
     for (let i = 0; i < outlen; i++) {
-        post_twiddle.push(math.exp(math.complex(0, -1 * math.pi * n0 * (i + offset) / N)));
+        post_twiddle.push(math.exp(math.complex(0, auxMul1 * (i + offset))));
     }
 
     X = []
-    aux_mul = math.dotMultiply(x, pre_twiddle);
-    for (let k = 0; k < N * 2; k++) {
-        aux_mul2 = -2 * math.pi * k / (N * 2);
+    let auxMul2 = math.dotMultiply(x, pre_twiddle);
+    for (let k = 0; k < N2; k++) {
+        let auxMul3 = -2 * math.pi * k / (N * 2);
         X[k] = []
-        for (let ii = 0; ii < N * 2; ii++) {
-            X[k].push(math.dotMultiply(aux_mul[ii], math.exp(math.complex(0, aux_mul2 * ii))))
+        for (let ii = 0; ii < N2; ii++) {
+            X[k].push(math.dotMultiply(auxMul2[ii], math.exp(math.complex(0, auxMul3 * ii))))
         }
         X[k] = X[k].reduce((a, b) => math.add(a, b));
     }
 
     if (!odd) {
         X[0] *= math.sqrt(0.5);
-        X[X.lenght - 1] *= math.sqrt(0.5);
+        X[X.length - 1] *= math.sqrt(0.5);
     }
 
     return math.dotMultiply(math.dotMultiply(X.slice(0, X.length / 2), post_twiddle), math.sqrt(1 / N));
 }
-
-function FFTNayuki(n) {
-
-    this.n = n;
-    this.levels = -1;
-    for (var i = 0; i < 32; i++) {
-        if (1 << i == n) {
-            this.levels = i;  // Equal to log2(n)
-        }
-    }
-    if (this.levels == -1) {
-        throw "Length is not a power of 2";
-    }
-    this.cosTable = new Array(n / 2);
-    this.sinTable = new Array(n / 2);
-    for (var i = 0; i < n / 2; i++) {
-        this.cosTable[i] = Math.cos(2 * Math.PI * i / n);
-        this.sinTable[i] = Math.sin(2 * Math.PI * i / n);
-    }
-    /*
-     * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
-     * The vector's length must be equal to the size n that was passed to the object constructor, and this must be a power of 2. Uses the Cooley-Tukey decimation-in-time radix-2 algorithm.
-     */
-    this.forward = function (real, imag) {
-        var n = this.n;
-
-        // Bit-reversed addressing permutation
-        for (var i = 0; i < n; i++) {
-            var j = reverseBits(i, this.levels);
-            if (j > i) {
-                var temp = real[i];
-                real[i] = real[j];
-                real[j] = temp;
-                temp = imag[i];
-                imag[i] = imag[j];
-                imag[j] = temp;
-            }
-        }
-
-        // Cooley-Tukey decimation-in-time radix-2 FFT
-        for (var size = 2; size <= n; size *= 2) {
-            var halfsize = size / 2;
-            var tablestep = n / size;
-            for (var i = 0; i < n; i += size) {
-                for (var j = i, k = 0; j < i + halfsize; j++, k += tablestep) {
-                    var tpre = real[j + halfsize] * this.cosTable[k] +
-                        imag[j + halfsize] * this.sinTable[k];
-                    var tpim = -real[j + halfsize] * this.sinTable[k] +
-                        imag[j + halfsize] * this.cosTable[k];
-                    real[j + halfsize] = real[j] - tpre;
-                    imag[j + halfsize] = imag[j] - tpim;
-                    real[j] += tpre;
-                    imag[j] += tpim;
-                }
-            }
-        }
-
-        // Returns the integer whose value is the reverse of the lowest 'bits' bits of the integer 'x'.
-        function reverseBits(x, bits) {
-            var y = 0;
-            for (var i = 0; i < bits; i++) {
-                y = (y << 1) | (x & 1);
-                x >>>= 1;
-            }
-            return y;
-        }
-    }
-    /*
-     * Computes the inverse discrete Fourier transform (IDFT) of the given complex vector, storing the result back into the vector.
-     * The vector's length must be equal to the size n that was passed to the object constructor, and this must be a power of 2. This is a wrapper function. This transform does not perform scaling, so the inverse is not a true inverse.
-     */
-    this.inverse = function (real, imag) {
-        forward(imag, real);
-    }
-}
-
 
 function imclt(X, odd = true) {
     if (!odd && X.length % 2 === 0) {
         throw "Even inverse CMDCT requires an odd number of coefficients"
     }
 
-    if (odd) {
-        N = X.length
-    }
-}
+    // if (odd) {
+        let N = X.length;
+        let N2 = N * 2;
+        let n0 = (N + 1) / 2;
+        let post_twiddle = [];
+        let auxMul0 = PI / N2;
+        for (let i = 0; i < N2; i++) {
+            post_twiddle.push(math.exp(math.complex(0, auxMul0 * (i + n0))));
+        }
 
-async function start() {
-
-    // Leer audio por defecto para pruebas
-    // loadJSON(function (data) {
-    //     default_audio = JSON.parse(data)
-    // }, default_audio_query);
-
-    // class GaussianDistribution extends tf.layers.Layer {
-    //     constructor(latent_space_dim) {
-    //         super({});
-    //         this.latent_space_dim = latent_space_dim;
-    //     }
-    //
-    //     call(inputs) {
-    //         let mu = inputs[0];
-    //         console.log(mu)
-    //         let log_variance = inputs[1];
-    //         console.log(log_variance)
-    //         let epsilon = tf.randomNormal([1, this.latent_space_dim.latentSpaceDim], 0, 1, 'float32');
-    //         console.log(epsilon)
-    //         let sampled_point = mu.add(log_variance.div(tf.scalar(2)).exp().mul(epsilon));
-    //         console.log(sampled_point.cast('float32'))
-    //         //console.log(tf.tensor(sampled_point).toFloat())
-    //
-    //         return sampled_point;
-    //     }
-    //
-    //     static get className() {
-    //         return 'GaussianDistribution';
-    //     }
+        let reversedX = _.cloneDeep(X);
+        reversedX.reverse(); // reverse
+        let Y1 = X;
+        let Y2 = math.dotMultiply(-1, math.conj(reversedX));
+        let Y = Y1.concat(Y2);
+    // } else {
+    //     // not odd not implemented
     // }
 
-    // tf.serialization.registerClass(GaussianDistribution);
-
-    zz = []
-    for (let i = 0; i < 2071; i++) {
-        zz.push(i)
+    let pre_twiddle = [];
+    let auxMul1 = PI * n0 / N;
+    for (let i = 0; i < N2; i++) {
+        pre_twiddle.push(math.exp(math.complex(0, auxMul1 * i)));
     }
 
-    spectrogramMateo(zz)
+    let y = [];
+    let auxMul2 = math.dotMultiply(Y, pre_twiddle);
+    for (let k = 0; k < N2; k++) {
+        let auxMul3 = PI2 * k / N2;
+        y[k] = []
+        for (let ii = 0; ii < N2; ii++) {
+            y[k].push(math.dotDivide(math.dotMultiply(auxMul2[ii], math.exp(math.complex(0, auxMul3 * ii))), N2));
+        }
+        y[k] = math.sum(y[k]);
+    }
 
+    return math.re(math.dotMultiply(math.dotMultiply(y, post_twiddle), math.sqrt(N)));
+
+}
+
+function phmod(ph) {
+    return ph < 0 ? PI2 + (ph % PI2) : ph % PI2
+}
+
+function unwrap(input, output) {
+    const size = input.length
+    if (!output) output = input
+    if (output === true) output = new Array(size)
+
+    let shift = 0
+    let prev = phmod(input[0])
+    output[0] = prev
+    for (let i = 1; i < size; i++) {
+        const current = phmod(input[i])
+        const diff = current - prev
+        if (diff < -PI) shift += PI2
+        else if (diff > PI) shift -= PI2
+        output[i] = current + shift
+        prev = current
+    }
+    return output
+}
+
+function normalizeSpec(data, minVal, maxVal, minData, maxData) {
+    let normArray = math.dotDivide(math.subtract(data, minData), (maxData - minData));
+    normArray = math.add(math.dotMultiply(normArray, (maxVal - minVal)), minVal);
+    return normArray
+}
+
+function denormalizeSpec(normData, minVal, maxVal, minData, maxData) {
+    let array = math.dotDivide(math.subtract(normData, minVal), math.subtract(maxVal, minVal));
+    array = math.add(math.dotMultiply(array, math.subtract(maxData, minData)), minData);
+    return array;
+}
+
+function magphase(complexValue) {
+    let angle = complexValue.arg();
+    //let unwrappedPhase = unwrap(angle, true);
+    let magnitude = complexValue.abs();
+    let dbMag = 20 * math.log10(magnitude);
+    return [dbMag, angle];
+}
+
+function arangeSpectrogram(spectrogram, type = "2D") {
+    let spectrogramResult = []
+    let magSpec = [];
+    let phaseSpec = [];
+    if (type === "2D") {
+        for (let frame = 0; frame < spectrogram.length; frame++) {
+            let magSpecAux = [];
+            let phaseSpecAux = [];
+            for (let index = 0; index < spectrogram[frame].length; index++) {
+                let [mag, phase] = magphase(spectrogram[frame][index]);
+                magSpecAux.push(mag);
+                phaseSpecAux.push(phase);
+            }
+
+            let unwrappedPhase = unwrap(phaseSpecAux, true);
+            // let magSpecAuxNorm = normalizeSpec(magSpecAux, 0, 1, -100, 0)
+            // let unwrappedPhaseNorm = normalizeSpec(unwrappedPhase, 0, 1, -100, 100)
+            magSpec.push(magSpecAux);
+            phaseSpec.push(unwrappedPhase);
+            // spectrogramResult.push(magSpecAuxNorm.concat(unwrappedPhaseNorm));
+        }
+
+
+        let magSpecNorm = normalizeSpec(magSpec, 0, 1, -100, 0)
+        let unwrappedPhaseNorm = normalizeSpec(phaseSpec, 0, 1, -100, 100)
+
+        spectrogramResult = magSpecNorm.concat(unwrappedPhaseNorm);
+    }
+    return spectrogramResult;
+}
+
+function convertPredictedSpectrogramIntoAudio(predictedSpec, type="2D") {
+    let magSpecNorm = predictedSpec.slice(0, predictedSpec.length/2);
+    let phaSpecNorm = predictedSpec.slice(predictedSpec.length/2, predictedSpec.length);
+    let magSpec = denormalizeSpec(magSpecNorm, 0, 1, -100, 0);
+    let phaSpec = denormalizeSpec(phaSpecNorm, 0, 1, -100, 100);
+
+    let reconstructedSpec = [];
+    for (let frame = 0; frame < magSpec.length; frame++) {
+        reconstructedSpec[frame] = [];
+        for (let index = 0; index < magSpec[frame].length; index++) {
+            let phase = math.complex(math.cos(phaSpec[frame][index][0]), math.sin(phaSpec[frame][index][0]));
+            reconstructedSpec[frame].push(math.dotMultiply(math.dotPow(10, math.dotDivide(magSpec[frame][index][0], 20)), phase));
+        }
+    }
+
+    let reconstructedSpecTransposed = reconstructedSpec[0].map((_, colIndex) => reconstructedSpec.map(row => row[colIndex]));
+
+    let signal = ispectrogramMateo(reconstructedSpecTransposed);
+    // Normalize signal to fit all the dynamic range TODO
+
+    return signal;
+}
+
+// let megadata =
+
+
+
+async function start() {
     encoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
     decoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
 
-    let tensor = tf.tensor2d(default_audio, [512, 64], 'float32')
-    let [mu_tensor, log_variance_tensor] = encoder_model.predict(tf.reshape(tensor, shape = [1, 512, 64, 1]));
-    let mu_latent_space = mu_tensor.dataSync();
-    let log_variance_latent_space = log_variance_tensor.dataSync();
-    let latent_space_size = mu_latent_space.length;
+    //Leer audio por defecto para pruebas
+    loadJSON(function (data) {
+    // console.log(data)
+        console.log("started")
+        default_audio = data
+        console.time('spectrogramMateo')
+        let mcltSpec = spectrogramMateo(default_audio)
+        console.timeEnd('spectrogramMateo')
+        mcltspecCut = mcltSpec.slice(0, mcltSpec.length-1);
+        mcltspecTransposed = mcltspecCut[0].map((_, colIndex) => mcltspecCut.map(row => row[colIndex]));
+        // console.log(mcltspecTransposed)
+        let mclt2Dspec = arangeSpectrogram(mcltspecTransposed)
+        // console.log("Espectrograma chido")
+        console.log(mclt2Dspec)
+        // let mclt2Dspec = megadata;
+        // mclt2Dspec = mclt2Dspec.slice(0, mclt2Dspec.length-1);
+        // mclt2Dspec = mclt2Dspec[0].map((_, colIndex) => mclt2Dspec.map(row => row[colIndex])); // Transpose array to fit the model
 
-    sampleValuesInLatentSpace = []
-    for (let i = 0; i < latent_space_size; i++) {
-        sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
-    }
 
-    let decoder_tensor = tf.tensor(sampleValuesInLatentSpace, [latent_space_size], 'float32');
-    let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
-    let predicted_spectrogram = await predicted_spectogram_tensor.array()
-    predicted_spectrogram = predicted_spectrogram[0]
+        //Decoder step
+        let tensor = tf.tensor2d(mclt2Dspec, [1024, 64], 'float32');
+        let [mu_tensor, log_variance_tensor] = encoder_model.predict(tf.reshape(tensor, shape = [1, 1024, 64, 1]));
+        let mu_latent_space = mu_tensor.dataSync();
+        let log_variance_latent_space = log_variance_tensor.dataSync();
+        let latent_space_size = mu_latent_space.length;
+        // console.log(mu_latent_space)
+        // console.log(log_variance_latent_space)
+        // console.log(latent_space_size)
+
+        sampleValuesInLatentSpace = []
+        for (let i = 0; i < latent_space_size; i++) {
+            //sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
+            sampleValuesInLatentSpace.push(mu_latent_space[i]);
+        }
+        // console.log(sampleValuesInLatentSpace)
+
+        let decoder_tensor = tf.tensor(sampleValuesInLatentSpace);
+        let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
+        // console.log(predicted_spectogram_tensor)
+        let predicted_spectrogram = predicted_spectogram_tensor.arraySync()
+        predicted_spectrogram = predicted_spectrogram[0];
+        let audio = convertPredictedSpectrogramIntoAudio(predicted_spectrogram);
+
+        console.log(audio);
+        // send audio to GUI
+
+    }, default_audio_query);
+
+    return
 
 
     //const model = tf.sequential();
@@ -339,7 +431,6 @@ async function start() {
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
     opt.dim = 2; // dimensionality of the embedding (2 = default)
-    // TODO: Añadir nuestro propio modelo de IA
     tsne = new tsnejs.tSNE(opt); // create a tSNE instance
 
     var online_offline_state = document.getElementById('myonoffswitch').checked;
@@ -354,7 +445,7 @@ async function start() {
         // "https://freesound.org/apiv2/search/text/?query=" + query + "&" +
         //     "group_by_pack=0&filter=duration:[0+TO+10]&fields=id,previews,name,analysis,url,username,images,ac_analysis" +
         //     extra_descriptors + "&page_size=150" +
-        //     "&token=eecfe4981d7f41d2811b4b03a894643d5e33f812&page=" + (i + 1);
+        //     "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=" + (i + 1);
     } else {
         // Set query to the json file
         var query = default_query;  //document.getElementById('query_terms_input').value;
@@ -363,7 +454,8 @@ async function start() {
         var reverb_type = document.getElementById('reverb_selector').value;
 
         // Load the json file
-        // TODO: cargar datos de la api de freesound
+        // TODO: carg
+        //  ar datos de la api de freesound
         loadJSON(function (data) {
             load_data_from_fs_json(data, source_type, reverb_type);
         }, query);
