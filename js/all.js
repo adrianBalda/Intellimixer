@@ -1,5 +1,9 @@
 /* Global variables and objects */
 
+// Variational Autoencoder stuff
+let encoderModel = undefined;
+let decoderModel = undefined;
+
 // Audio stuff
 var audio_manager = new AudioManager();
 var MONO_MODE = true;
@@ -327,63 +331,59 @@ function convertPredictedSpectrogramIntoAudio(predictedSpec, type="2D") {
     return signal;
 }
 
-// let megadata =
-
-
 
 async function start() {
-    encoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
-    decoder_model = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
+
 
     //Leer audio por defecto para pruebas
-    loadJSON(function (data) {
-    // console.log(data)
-        console.log("started")
-        default_audio = data
-        console.time('spectrogramMateo')
-        let mcltSpec = spectrogramMateo(default_audio)
-        console.timeEnd('spectrogramMateo')
-        mcltspecCut = mcltSpec.slice(0, mcltSpec.length-1);
-        mcltspecTransposed = mcltspecCut[0].map((_, colIndex) => mcltspecCut.map(row => row[colIndex]));
-        // console.log(mcltspecTransposed)
-        let mclt2Dspec = arangeSpectrogram(mcltspecTransposed)
-        // console.log("Espectrograma chido")
-        console.log(mclt2Dspec)
-        // let mclt2Dspec = megadata;
-        // mclt2Dspec = mclt2Dspec.slice(0, mclt2Dspec.length-1);
-        // mclt2Dspec = mclt2Dspec[0].map((_, colIndex) => mclt2Dspec.map(row => row[colIndex])); // Transpose array to fit the model
-
-
-        //Decoder step
-        let tensor = tf.tensor2d(mclt2Dspec, [1024, 64], 'float32');
-        let [mu_tensor, log_variance_tensor] = encoder_model.predict(tf.reshape(tensor, shape = [1, 1024, 64, 1]));
-        let mu_latent_space = mu_tensor.dataSync();
-        let log_variance_latent_space = log_variance_tensor.dataSync();
-        let latent_space_size = mu_latent_space.length;
-        // console.log(mu_latent_space)
-        // console.log(log_variance_latent_space)
-        // console.log(latent_space_size)
-
-        sampleValuesInLatentSpace = []
-        for (let i = 0; i < latent_space_size; i++) {
-            //sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
-            sampleValuesInLatentSpace.push(mu_latent_space[i]);
-        }
-        // console.log(sampleValuesInLatentSpace)
-
-        let decoder_tensor = tf.tensor(sampleValuesInLatentSpace);
-        let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
-        // console.log(predicted_spectogram_tensor)
-        let predicted_spectrogram = predicted_spectogram_tensor.arraySync()
-        predicted_spectrogram = predicted_spectrogram[0];
-        let audio = convertPredictedSpectrogramIntoAudio(predicted_spectrogram);
-
-        console.log(audio);
-        // send audio to GUI
-
-    }, default_audio_query);
-
-    return
+    // loadJSON(function (data) {
+    // // console.log(data)
+    //     console.log("started")
+    //     default_audio = data
+    //     console.time('spectrogramMateo')
+    //     let mcltSpec = spectrogramMateo(default_audio)
+    //     console.timeEnd('spectrogramMateo')
+    //     mcltspecCut = mcltSpec.slice(0, mcltSpec.length-1);
+    //     mcltspecTransposed = mcltspecCut[0].map((_, colIndex) => mcltspecCut.map(row => row[colIndex]));
+    //     // console.log(mcltspecTransposed)
+    //     let mclt2Dspec = arangeSpectrogram(mcltspecTransposed)
+    //     // console.log("Espectrograma chido")
+    //     console.log(mclt2Dspec)
+    //     // let mclt2Dspec = megadata;
+    //     // mclt2Dspec = mclt2Dspec.slice(0, mclt2Dspec.length-1);
+    //     // mclt2Dspec = mclt2Dspec[0].map((_, colIndex) => mclt2Dspec.map(row => row[colIndex])); // Transpose array to fit the model
+    //
+    //
+    //     //Decoder step
+    //     let tensor = tf.tensor2d(mclt2Dspec, [1024, 64], 'float32');
+    //     let [mu_tensor, log_variance_tensor] = encoder_model.predict(tf.reshape(tensor, shape = [1, 1024, 64, 1]));
+    //     let mu_latent_space = mu_tensor.dataSync();
+    //     let log_variance_latent_space = log_variance_tensor.dataSync();
+    //     let latent_space_size = mu_latent_space.length;
+    //     // console.log(mu_latent_space)
+    //     // console.log(log_variance_latent_space)
+    //     // console.log(latent_space_size)
+    //
+    //     sampleValuesInLatentSpace = []
+    //     for (let i = 0; i < latent_space_size; i++) {
+    //         //sampleValuesInLatentSpace.push(sampleFromLatentSpace(mu_latent_space[i], log_variance_latent_space[i]));
+    //         sampleValuesInLatentSpace.push(mu_latent_space[i]);
+    //     }
+    //     // console.log(sampleValuesInLatentSpace)
+    //
+    //     let decoder_tensor = tf.tensor(sampleValuesInLatentSpace);
+    //     let predicted_spectogram_tensor = decoder_model.predict(tf.reshape(decoder_tensor, shape = [1, latent_space_size]));
+    //     // console.log(predicted_spectogram_tensor)
+    //     let predicted_spectrogram = predicted_spectogram_tensor.arraySync()
+    //     predicted_spectrogram = predicted_spectrogram[0];
+    //     let audio = convertPredictedSpectrogramIntoAudio(predicted_spectrogram);
+    //
+    //     console.log(audio);
+    //     // send audio to GUI
+    //
+    // }, default_audio_query);
+    //
+    // return
 
 
     //const model = tf.sequential();
@@ -473,10 +473,33 @@ window.requestAnimFrame = (function () { // This is called when code reaches thi
         };
 })();
 
-(function init() { // This is called when code reaches this point
+// Add the number of variables in latent space to html select tag items
+function initLantentSpaceVariableSelector(latentSpaceDimension) { // This is called when code reaches this point
+    let xSelector = document.getElementById('x_axis_map_descriptors_selector');
+    let ySelector = document.getElementById('y_axis_map_descriptors_selector');
+    for (let i = 1; i<=latentSpaceDimension; i++) {
+        let optX = document.createElement('option');
+        optX.value = String(i);
+        optX.innerHTML = "Dimension " + i;
+        let optY = document.createElement('option');
+        optY.value = String(i);
+        optY.innerHTML = "Dimension " + i;
+        xSelector.appendChild(optX);
+        ySelector.appendChild(optY);
+    }
+}
+
+(async function init() { // This is called when code reaches this point
     window.addEventListener("keydown", onKeyDown, false);
     window.addEventListener("keyup", onKeyUp, false);
+    // get encoder tensorflow model
+    encoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
+    // get decoder tensorflow model
+    decoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
+    // Add the number of variables in latent space to html select tag items
+    initLantentSpaceVariableSelector(encoderModel.outputShape[0][1]);
     setMapDescriptor();
+    update_axis_labels();
 })();
 
 (function loop() {  // This is called when code reaches this point
@@ -844,18 +867,14 @@ function draw() {
 
 // axis text label drawing
 function update_axis_labels() {
-    if (map_type == "tsne") {
-        nice_x_text = "Similarity";
-        nice_y_text = "Similarity";
-        document.getElementById('y_axis_box').innerHTML = "Similarity";
-    } else {
-        var nice_x_text = convert_to_nice_string(map_features[0])
-        var nice_y_text = convert_to_nice_string(map_features[1])
-    }
+    console.log(map_features)
+    // var nice_x_text = convert_to_nice_string(map_features[0])
+    // var nice_y_text = convert_to_nice_string(map_features[1])
+
 
     // update the text boxes
-    document.getElementById('x_axis_box').innerHTML = nice_x_text;
-    document.getElementById('y_axis_box').innerHTML = nice_y_text;
+    document.getElementById('x_axis_box').innerHTML = map_features[0];
+    document.getElementById('y_axis_box').innerHTML = map_features[1];
 
 }
 
