@@ -11,7 +11,7 @@ let model
 let sampleValuesInLatentSpace
 
 // Sounds and content
-var default_query = "files/BlogPostDemo.json"
+var default_query = "footstep"
 var default_audio_query = "files/audioPrueba.json"
 var default_audio = []
 var default_query_model = "files/model/model.json"
@@ -118,7 +118,7 @@ function spectrogramMateo(data, framelength = 1024, centered = true) {
 //         alv[i].push(j*i)
 //     }}
 
-function ispectrogramMateo(data, framelength=1024, centered = true) {
+function ispectrogramMateo(data, framelength = 1024, centered = true) {
     let overlap = 2;
     let hopsize = framelength / overlap;
     let spectrogram = data;
@@ -133,12 +133,11 @@ function ispectrogramMateo(data, framelength=1024, centered = true) {
     for (let i = 0; i < values.length; i++) {
         if (i == 0) {
             result = result.concat(values[i].slice(0, values[i].length / 2));
-            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i+1].slice(0, values[i+1].length / 2)));
-        }
-        else if (i == values.length-1) {
+            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i + 1].slice(0, values[i + 1].length / 2)));
+        } else if (i == values.length - 1) {
             result = result.concat(values[i].slice(values[i].length / 2, values[i].length));
         } else {
-            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i+1].slice(0, values[i+1].length / 2)));
+            result = result.concat(math.add(values[i].slice(values[i].length / 2, values[i].length), values[i + 1].slice(0, values[i + 1].length / 2)));
         }
     }
 
@@ -195,20 +194,20 @@ function imclt(X, odd = true) {
     }
 
     // if (odd) {
-        let N = X.length;
-        let N2 = N * 2;
-        let n0 = (N + 1) / 2;
-        let post_twiddle = [];
-        let auxMul0 = PI / N2;
-        for (let i = 0; i < N2; i++) {
-            post_twiddle.push(math.exp(math.complex(0, auxMul0 * (i + n0))));
-        }
+    let N = X.length;
+    let N2 = N * 2;
+    let n0 = (N + 1) / 2;
+    let post_twiddle = [];
+    let auxMul0 = PI / N2;
+    for (let i = 0; i < N2; i++) {
+        post_twiddle.push(math.exp(math.complex(0, auxMul0 * (i + n0))));
+    }
 
-        let reversedX = _.cloneDeep(X);
-        reversedX.reverse(); // reverse
-        let Y1 = X;
-        let Y2 = math.dotMultiply(-1, math.conj(reversedX));
-        let Y = Y1.concat(Y2);
+    let reversedX = _.cloneDeep(X);
+    reversedX.reverse(); // reverse
+    let Y1 = X;
+    let Y2 = math.dotMultiply(-1, math.conj(reversedX));
+    let Y = Y1.concat(Y2);
     // } else {
     //     // not odd not implemented
     // }
@@ -308,9 +307,9 @@ function arangeSpectrogram(spectrogram, type = "2D") {
     return spectrogramResult;
 }
 
-function convertPredictedSpectrogramIntoAudio(predictedSpec, type="2D") {
-    let magSpecNorm = predictedSpec.slice(0, predictedSpec.length/2);
-    let phaSpecNorm = predictedSpec.slice(predictedSpec.length/2, predictedSpec.length);
+function convertPredictedSpectrogramIntoAudio(predictedSpec, type = "2D") {
+    let magSpecNorm = predictedSpec.slice(0, predictedSpec.length / 2);
+    let phaSpecNorm = predictedSpec.slice(predictedSpec.length / 2, predictedSpec.length);
     let magSpec = denormalizeSpec(magSpecNorm, 0, 1, -100, 0);
     let phaSpec = denormalizeSpec(phaSpecNorm, 0, 1, -100, 100);
 
@@ -332,7 +331,7 @@ function convertPredictedSpectrogramIntoAudio(predictedSpec, type="2D") {
 }
 
 
-async function start() {
+function start() {
 
 
     //Leer audio por defecto para pruebas
@@ -433,35 +432,61 @@ async function start() {
     opt.dim = 2; // dimensionality of the embedding (2 = default)
     tsne = new tsnejs.tSNE(opt); // create a tSNE instance
 
-    var online_offline_state = document.getElementById('myonoffswitch').checked;
+    //var online_offline_state = document.getElementById('myonoffswitch').checked;
 
-    if (online_offline_state) {
-        console.log("freesound api")
-        // how many pages to download
-        // num_files = parseInt(document.getElementById('num_of_files').value, 10);
-        // n_pages = Math.round(num_files / 150) + 1;
+    num_files = 3; // parseInt(document.getElementById('num_of_files').value, 10);
+    n_pages = Math.round(num_files / 150) + 1;
 
+    // n_pages = 3;
+    //this is in online mode
+    var query = document.getElementById('query_terms_input').value;
+
+    // Search sounds in Freesound and start loading them
+    if ((query == undefined) || (query == "")) {
+        query = default_query;
+    }
+
+    for (let i = 0; i < n_pages; i++) {
+        let url = "https://freesound.org/apiv2/search/text/?query=" + query + "&group_by_pack=0" +
+            "&filter=duration:2" + "&page_size=150&fields=id,previews,name,analysis,url,username,images" +
+            "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=" + (i + 1);
 
         // "https://freesound.org/apiv2/search/text/?query=" + query + "&" +
         //     "group_by_pack=0&filter=duration:[0+TO+10]&fields=id,previews,name,analysis,url,username,images,ac_analysis" +
         //     extra_descriptors + "&page_size=150" +
-        //     "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=" + (i + 1);
-    } else {
-        // Set query to the json file
-        var query = default_query;  //document.getElementById('query_terms_input').value;
-        // Get variables for the source type and reverberance
-        var source_type = document.getElementById('source_selector').value;
-        var reverb_type = document.getElementById('reverb_selector').value;
-
-        // Load the json file
-        // TODO: carg
-        //  ar datos de la api de freesound
+        //     "&token=eecfe4981d7f41d2811b4b03a894643d5e33f812&page=" + (i + 1);
         loadJSON(function (data) {
-            load_data_from_fs_json(data, source_type, reverb_type);
-        }, query);
-        n_pages = 1; // set n_pages to 1 as we only load one file, a hangover from freesound searching
-        document.getElementById('info_placeholder').innerHTML = "Loading from file...";
+            load_data_from_fs_json(data);
+        }, url);
     }
+
+    // if (online_offline_state) {
+    //     console.log("freesound api")
+    //     // how many pages to download
+    //     // num_files = parseInt(document.getElementById('num_of_files').value, 10);
+    //     // n_pages = Math.round(num_files / 150) + 1;
+    //
+    //
+    //     // "https://freesound.org/apiv2/search/text/?query=" + query + "&" +
+    //     //     "group_by_pack=0&filter=duration:[0+TO+10]&fields=id,previews,name,analysis,url,username,images,ac_analysis" +
+    //     //     extra_descriptors + "&page_size=150" +
+    //     //     "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=" + (i + 1);
+    // } else {
+    //     // Set query to the json file
+    //     var query = default_query;  //document.getElementById('query_terms_input').value;
+    //     // Get variables for the source type and reverberance
+    //     var source_type = document.getElementById('source_selector').value;
+    //     var reverb_type = document.getElementById('reverb_selector').value;
+    //
+    //     // Load the json file
+    //     // TODO: carg
+    //     //  ar datos de la api de freesound
+    //     loadJSON(function (data) {
+    //         load_data_from_fs_json(data, source_type, reverb_type);
+    //     }, query);
+    //     n_pages = 1; // set n_pages to 1 as we only load one file, a hangover from freesound searching
+    //     document.getElementById('info_placeholder').innerHTML = "Loading from file...";
+    // }
 }
 
 window.requestAnimFrame = (function () { // This is called when code reaches this point
@@ -477,7 +502,7 @@ window.requestAnimFrame = (function () { // This is called when code reaches thi
 function initLantentSpaceVariableSelector(latentSpaceDimension) { // This is called when code reaches this point
     let xSelector = document.getElementById('x_axis_map_descriptors_selector');
     let ySelector = document.getElementById('y_axis_map_descriptors_selector');
-    for (let i = 1; i<=latentSpaceDimension; i++) {
+    for (let i = 1; i <= latentSpaceDimension; i++) {
         let optX = document.createElement('option');
         optX.value = String(i);
         optX.innerHTML = "Dimension " + i;
@@ -493,9 +518,9 @@ function initLantentSpaceVariableSelector(latentSpaceDimension) { // This is cal
     window.addEventListener("keydown", onKeyDown, false);
     window.addEventListener("keyup", onKeyUp, false);
     // get encoder tensorflow model
-    encoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
-    // get decoder tensorflow model
-    decoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
+    // encoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/encoder_model/model.json');
+    // // get decoder tensorflow model
+    // decoderModel = await tf.loadLayersModel('https://models.seamosrealistas.com/decoder_model/model.json');
     // Add the number of variables in latent space to html select tag items
     initLantentSpaceVariableSelector(encoderModel.outputShape[0][1]);
     setMapDescriptor();
@@ -503,58 +528,21 @@ function initLantentSpaceVariableSelector(latentSpaceDimension) { // This is cal
 })();
 
 (function loop() {  // This is called when code reaches this point
-    if (map_type == "tsne") {
-        // Compute new position of sounds in tsne and update sounds xy
-        if ((all_loaded == true) && (current_it_number <= max_tsne_iterations)) {
-            document.getElementById('info_placeholder').innerHTML = 'Projecting sounds...';
-            tsne.step();
-            Y = tsne.getSolution();
-            var xx = [];
-            var yy = [];
-            for (i in Y) {
-                xx.push(Y[i][0]);
-                yy.push(Y[i][1]);
-            }
-            min_xx = Math.min(...xx);
-            max_xx = Math.max(...xx);
-            min_yy = Math.min(...yy);
-            max_yy = Math.max(...yy);
-            var delta_xx = max_xx - min_xx;
-            var delta_yy = max_yy - min_yy;
-            for (i in sounds) {
-                var sound = sounds[i];
-                var x = Y[i][0];
-                var y = Y[i][1];
-                sound.x = -min_xx / delta_xx + x / delta_xx;
-                sound.y = -min_yy / delta_yy + y / delta_yy;
-                if (delta_xx > delta_yy) {
-                    sound.y = sound.y * (delta_yy / delta_xx); // Preserve tsne aspect ratio
-                } else {
-                    sound.x = sound.x * (delta_xx / delta_yy); // Preserve tsne aspect ratio
-                }
-                sound.x = sound.x * Math.pow(100, current_it_number / max_tsne_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_tsne_iterations - 1)); // Smooth position at the beginning
-                sound.y = sound.y * Math.pow(100, current_it_number / max_tsne_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_tsne_iterations - 1)); // Smooth position at the beginning
-            }
-            current_it_number += 1;
+    // Get sound's xy position and scale it smoothly to create an animation effect
+    if ((all_loaded == true) && (current_it_number <= max_xy_iterations)) {
+        document.getElementById('info_placeholder').innerHTML = 'Projecting sounds...';
+        for (i in sounds) {
+            var sound = sounds[i];
+            sound.x = sound.computed_x * Math.pow(100, current_it_number / max_xy_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_xy_iterations - 1)); // Smooth position at the beginning
+            sound.y = sound.computed_y * Math.pow(100, current_it_number / max_xy_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_xy_iterations - 1)); // Smooth position at the beginning
         }
-        if (current_it_number >= max_tsne_iterations) {
-            document.getElementById('info_placeholder').innerHTML = "Done, " + sounds.length + " sounds loaded!";
-        }
-    } else if (map_type == "xy") {
-        // Get sound's xy position and scale it smoothly to create an animation effect
-        if ((all_loaded == true) && (current_it_number <= max_xy_iterations)) {
-            document.getElementById('info_placeholder').innerHTML = 'Projecting sounds...';
-            for (i in sounds) {
-                var sound = sounds[i];
-                sound.x = sound.computed_x * Math.pow(100, current_it_number / max_xy_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_xy_iterations - 1)); // Smooth position at the beginning
-                sound.y = sound.computed_y * Math.pow(100, current_it_number / max_xy_iterations - 1) + 0.5 * (1 - Math.pow(100, current_it_number / max_xy_iterations - 1)); // Smooth position at the beginning
-            }
-            current_it_number += 1;
-        }
-        if (current_it_number >= max_xy_iterations - 1) {
-            document.getElementById('info_placeholder').innerHTML = "Done, " + sounds.length + " sounds loaded!";
-        }
+        current_it_number += 1;
     }
+    if (current_it_number >= max_xy_iterations - 1) {
+        document.getElementById('info_placeholder').innerHTML = "Done, " + sounds.length + " sounds loaded!";
+    }
+    // console.log("loop")
+
     draw();
     requestAnimFrame(loop);
 })();
@@ -563,8 +551,8 @@ function initLantentSpaceVariableSelector(latentSpaceDimension) { // This is cal
 /* Sounds stuff */
 
 function SoundFactory(id, preview_url, analysis, url, name, username, image) {
-    this.x = 0.5; //Math.random();
-    this.y = 0.5; //Math.random();
+    this.x = Math.random();
+    this.y = Math.random();
     this.rad = 15;
     this.mod_position = Math.random();
     this.mod_inc = 0.1;
@@ -576,11 +564,12 @@ function SoundFactory(id, preview_url, analysis, url, name, username, image) {
     this.analysis = analysis;
 
     // Set color of the points
-    var color = rgbToHex(
-        Math.floor(255 * analysis['sfx']['tristimulus']['mean'][0]),
-        Math.floor(255 * analysis['sfx']['tristimulus']['mean'][1]),
-        Math.floor(255 * analysis['sfx']['tristimulus']['mean'][2])
-    )
+    // var color = rgbToHex(
+    //     Math.floor(255 * analysis['sfx']['tristimulus']['mean'][0]),
+    //     Math.floor(255 * analysis['sfx']['tristimulus']['mean'][1]),
+    //     Math.floor(255 * analysis['sfx']['tristimulus']['mean'][2])
+    // )
+    var color = rgbToHex(255, 255, 255)
     this.rgba = color;
 
     this.url = url;
@@ -594,144 +583,39 @@ async function load_model_from_local_json(data) {
     console.log('hei po dai')
 }
 
-function load_data_from_fs_json(data, source_type, reverb_type) {
-    if ((source_type == "all") || (source_type == "") || (source_type == undefined)) {
-        // source type not selected, use all sources
-        for (i in data['results']) {
-            var sound_json = data['results'][i];
-            var reverb_match = false;
-            if (sound_json['analysis'] != undefined) {
-                if (reverb_type == "all") {
-                    reverb_match = true
-                } else {
-                    if (sound_json['analysis']['timbre']['reverb'] == reverb_type) {
-                        reverb_match = true
-                    }
-                }
-                if (reverb_match) {
-                    var sound = new SoundFactory(
-                        id = sound_json['id'],
-                        preview_url = sound_json['audio'] || sound_json['previews']['preview-lq-mp3'],
-                        analysis = sound_json['analysis'],
-                        url = sound_json['url'],
-                        name = sound_json['name'],
-                        username = sound_json['username'],
-                        image = sound_json['image'] || sound_json['images']['spectral_m'],
-                    );
-                    sounds.push(sound);
-                }
-            }
-        }
-    } else {
-        // a source type is defined, use only that source type
-        //TODO Filter this by reverb_type
-        for (i in data['results']) {
-            var sound_json = data['results'][i];
-            var reverb_match = false;
-            if (sound_json['analysis'] != undefined) {
-                if (reverb_type == "all") {
-                    reverb_match = true
-                } else {
-                    if (sound_json['analysis']['timbre']['reverb'] == reverb_type) {
-                        reverb_match = true
-                    }
-                }
-                if (reverb_match) {
-                    var this_name = sound_json['name'];
-                    var this_source_type = sound_json['source_type'];
-                    var source_match = false;
-                    if (source_type.startsWith('-')) {
-                        var array_source_type = source_type.split('-');
-                        for (j in array_source_type) {
-                            if (array_source_type[j] == this_source_type) {
-                                source_match = true;
-                            }
-                        }
-                    } else {
-                        if (this_source_type == source_type) {
-                            source_match = true;
-                        }
-                    }
-                    // get the reverberant charadteristic of the sound and compare to json file
-                    if (source_type.startsWith('-')) {
-                        var array_source_type = source_type.split('-');
-                        for (j in array_source_type) {
-                            if (array_source_type[j] == this_source_type) {
-                                source_match = true;
-                            }
-                        }
-                    } else {
-                        if (this_source_type == source_type) {
-                            source_match = true;
-                        }
-                    }
-                    if ((sound_json['analysis'] != undefined) && source_match) {
-                        var sound = new SoundFactory(
-                            id = sound_json['id'],
-                            preview_url = sound_json['audio'] || sound_json['previews']['preview-lq-mp3'],
-                            analysis = sound_json['analysis'],
-                            url = sound_json['url'],
-                            name = sound_json['name'],
-                            username = sound_json['username'],
-                            image = sound_json['image'] || sound_json['images']['spectral_m'],
-                        );
-                        sounds.push(sound);
-                    }
-                }
-            }
-        }
-    }
-    if (n_pages_received == n_pages) {
-        if (map_type == "tsne") {
-            // Init t-sne with sounds features
-            var X = [];
-            for (i in sounds) {
-                sound_i = sounds[i];
-                map_similarity_feature = map_features[0]
-                var feature_vector = Object.byString(sound_i, 'analysis.' + map_similarity_feature);
-                X.push(feature_vector);
-            }
-            tsne.initDataRaw(X);
-        } else if (map_type == "xy") {
-            // Get max and min values for the 2 axis
-            for (i in sounds) {
-                var sound = sounds[i];
-                x = Object.byString(sound, 'analysis.' + map_features[0]);
-                y = Object.byString(sound, 'analysis.' + map_features[1]);
+function load_data_from_fs_json(data) {
+    let x = [];
+    let y = [];
+    for (i in data['results']) {
+        console.log(data)
+        var sound_json = data['results'][i];
+        var sound = new SoundFactory(
+            id = sound_json['id'],
+            preview_url = sound_json['audio'] || sound_json['previews']['preview-lq-mp3'],
+            analysis = sound_json['analysis'],
+            url = sound_json['url'],
+            name = sound_json['name'],
+            username = sound_json['username'],
+            image = sound_json['image'] || sound_json['images']['spectral_m'],
+        );
+        sounds.push(sound);
 
-                // init max min vars if eneded
-                if (i == 0) {
-                    map_xy_x_max = x;
-                    map_xy_x_min = x;
-                    map_xy_y_max = y;
-                    map_xy_y_min = y;
-                }
-
-                if (x > map_xy_x_max) {
-                    map_xy_x_max = x;
-                }
-                if (y > map_xy_y_max) {
-                    map_xy_y_max = y;
-                }
-                if (x < map_xy_x_min) {
-                    map_xy_x_min = x;
-                }
-                if (y < map_xy_y_min) {
-                    map_xy_y_min = y;
-                }
-            }
-            // Compute sounds x, y position in the normalized space
-            for (i in sounds) {
-                var sound = sounds[i];
-                x = Object.byString(sound, 'analysis.' + map_features[0]);
-                y = Object.byString(sound, 'analysis.' + map_features[1]);
-                sound.computed_x = (x - map_xy_x_min) / (map_xy_x_max - map_xy_x_min);
-                sound.computed_y = 1 - (y - map_xy_y_min) / (map_xy_y_max - map_xy_y_min);
-            }
-        }
-        all_loaded = true;
-        console.log('Loaded map with ' + sounds.length + ' sounds')
+        x.push(Math.random() * 5); // TODO get model latent space dim
+        y.push(Math.random() * 5); // TODO get model latent space dim
     }
+
+    map_xy_x_max = Math.max.apply(null, x);
+    map_xy_x_min = Math.min.apply(null, x);
+    map_xy_y_max = Math.max.apply(null, y);
+    map_xy_y_min = Math.min.apply(null, y);
+
+    for (i in sounds) {
+        sounds[i].computed_x = (x[i] - map_xy_x_min) / (map_xy_x_max - map_xy_x_min);
+        sounds[i].computed_y = 1 - (y[i] - map_xy_y_min) / (map_xy_y_max - map_xy_y_min);
+    }
+
+    all_loaded = true;
+    console.log('Loaded map with ' + sounds.length + ' sounds');
 }
 
 function checkSelectSound(x, y) {

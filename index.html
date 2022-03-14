@@ -10,7 +10,7 @@
 
 <div id="query_box" class="box">
     <form id="query-form" class="query-form">
-        <input id="query_terms_input" type="text" placeholder="BlogPostDemo.json">
+        <input id="query_terms_input" type="text" placeholder="Footstep">
         <input type="submit" id="go_button" value="Go!">
         <p>Select x-axis attribute</p>
         <select id="x_axis_map_descriptors_selector" onchange="start()">
@@ -110,6 +110,7 @@
         <input type="file" id="upload-weights" multiple="multiple"/>
         <button onclick="getModels()">Confirmar</button>
     </div>
+    <div id="waveform"></div>
 </div>
 
 <div id="instructions_box" class="box">
@@ -138,6 +139,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.5/dist/jstat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://unpkg.com/wavesurfer.js"></script>
 <script type="text/javascript" src="dist/async.min.js"></script>
 <script src="dist/DSP.js"></script>
 <script src="js/inputevents.js"></script>
