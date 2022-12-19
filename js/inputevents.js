@@ -10,7 +10,7 @@ function onWheel(event){
     var delta = e.deltaY;
 
     if (wheel_zoom) {
-        zoom_factor -= delta * 0.05; //delta_zoom / ((w + h)/2);
+        zoom_factor -= delta * 0.0005; //delta_zoom / ((w + h)/2);
         if (zoom_factor < min_zoom) {
             zoom_factor = min_zoom;
         } else if (zoom_factor > max_zoom){
@@ -18,7 +18,6 @@ function onWheel(event){
         }
     }
 }
-
 
 
 function onKeyDown(event){
@@ -52,7 +51,7 @@ function onMouseUp(event){
 
     var d = new Date();
     current_click_time = d.getTime();
-    if ((current_click_time - start_mouse_down_time) < 200){
+    if ((current_click_time - start_mouse_down_time) < 100){
         click_x = event.pageX;
         click_y = event.pageY;
         var norm_click_x = 0;
