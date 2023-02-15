@@ -85,42 +85,31 @@ function denormalizeSpec(normData, minVal, maxVal, minData, maxData) {
     return array;
 }
 
-function magphase(complexValue) {
-    let angle = complexValue.arg();
+// function magphase(complexValue) {
+//     let angle = complexValue.arg();
     //let unwrappedPhase = unwrap(angle, true);
-    let magnitude = complexValue.abs();
-    magnitude <= 0 ? magnitude = 0.00001: magnitude // check if it's zero or negative (convert to -100 db)
-    let dbMag = 20 * math.log10(magnitude);
-    return [dbMag, angle];
-}
+//     let magnitude = complexValue.abs();
+//     magnitude <= 0 ? magnitude = 0.00001: magnitude // check if it's zero or negative (convert to -100 db)
+//     let dbMag = 20 * math.log10(magnitude);
+//     return [dbMag, angle];
+// }
 
-function arangeSpectrogram(spectrogram, type = "2D") {
+function spectrogram(spectrogram, type = "2D") {
     let spectrogramResult = []
     let magSpec = [];
-    let phaseSpec = [];
     if (type === "2D") {
         for (let frame = 0; frame < spectrogram.length; frame++) {
             let magSpecAux = [];
-            let phaseSpecAux = [];
             for (let index = 0; index < spectrogram[frame].length; index++) {
-                let [mag, phase] = magphase(spectrogram[frame][index]);
+                let magnitude = spectrogram[frame][index];
+                magnitude <= 0 ? magnitude = 0.00001: magnitude // check if it's zero or negative (convert to -100 db)
+                let mag = 20 * math.log10(magnitude);        
                 magSpecAux.push(mag);
-                phaseSpecAux.push(phase);
             }
-
-            let unwrappedPhase = unwrap(phaseSpecAux, true);
-            // let magSpecAuxNorm = normalizeSpec(magSpecAux, 0, 1, -100, 0)
-            // let unwrappedPhaseNorm = normalizeSpec(unwrappedPhase, 0, 1, -100, 100)
             magSpec.push(magSpecAux);
-            phaseSpec.push(unwrappedPhase);
-            // spectrogramResult.push(magSpecAuxNorm.concat(unwrappedPhaseNorm));
         }
-
-
         let magSpecNorm = normalizeSpec(magSpec, 0, 1, -100, 0)
-        let unwrappedPhaseNorm = normalizeSpec(phaseSpec, 0, 1, -100, 100)
-
-        spectrogramResult = magSpecNorm.concat(unwrappedPhaseNorm);
+        spectrogramResult = magSpecNorm;
     }
     return spectrogramResult;
 }
