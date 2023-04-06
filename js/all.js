@@ -20,6 +20,8 @@ let MONO_MODE = true;
 
 // Sounds and content
 let default_query = "footstep";
+let minDuration = 1;
+let maxDuration = 2;
 let sounds = [];
 let sampledSounds = [];
 let extra_descriptors = undefined;
@@ -113,8 +115,11 @@ function start() {
     "https://freesound.org/apiv2/search/text/?query=" +
     query +
     "&group_by_pack=0" +
-    "&filter=duration:[1+TO+2]" +
-    "&page_size=" +
+    "&filter=duration:[" +
+    minDuration +
+    "+TO+" +
+    maxDuration +
+    "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
     "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=2";
@@ -122,6 +127,35 @@ function start() {
   loadJSON(function (data) {
     load_data_from_fs_json(data);
   }, url);
+}
+
+function checkDurations() {
+  const submitBtn = document.getElementById("submit-btn");
+  const errorMessage = document.getElementById("error-message");
+  const input_minDuration = parseInt(
+    document.getElementById("query_min_time_input").value
+  );
+  const input_maxDuration = parseInt(
+    document.getElementById("query_max_time_input").value
+  );
+  const mensajeError = "Invalid range for the sounds: Minimum range must be lower than maximum range!";
+
+  if (input_minDuration) {
+    minDuration = input_minDuration;
+  }
+
+  if (input_maxDuration) {
+    maxDuration = input_maxDuration;
+  }
+
+  if (minDuration >= maxDuration) {
+    submitBtn.disabled = true;
+    errorMessage.innerHTML = mensajeError;
+    errorMessage.style.display = "block";
+  } else {
+    submitBtn.disabled = false;
+    errorMessage.style.display = "none";
+  }
 }
 
 function changeAxisAttribute() {
@@ -322,7 +356,9 @@ function load_data_from_fs_json(data) {
         const data = element.slice(0, 256);
         finalData.push(data);
       });
-      let mcltspecTransposed = finalData[0].map((_, colIndex) => finalData.map(row => row[colIndex]));
+      let mcltspecTransposed = finalData[0].map((_, colIndex) =>
+        finalData.map((row) => row[colIndex])
+      );
       let mclt2Dspec = spectrogram(mcltspecTransposed);
       let { mu_latent_space, log_variance_latent_space } =
         encodeAudio(mclt2Dspec);
@@ -473,7 +509,10 @@ function getSoundFromId(sound_id) {
 
 function showSoundInfo(sound) {
   let html = "";
-  if (sound.image !== undefined && sound.image !== "") {
+  if (
+    sound.image !== undefined &&
+    sound.image !== ""
+  ) {
     html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
   }
   html +=

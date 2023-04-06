@@ -75,28 +75,75 @@ canvas{
 }
 
 #query_terms_input {
-	width: 240px;
+	width: 150px;
 	padding: 7px;
 	border-radius: 5px;
 	border: 0px;
 	height: 30px;
 }
 
-#go_button {
-	padding: 0px;
+#query_min_time_input {
+	margin-top: 10px;
+	width: 60px;
+	padding: 7px;
 	border-radius: 5px;
 	border: 0px;
 	height: 30px;
-	width: 34px;
 }
 
-#source_go_button {
-	padding: 0px;
+#query_max_time_input {
+	margin-top: 10px;
+	width: 60px;
+	padding: 7px;
 	border-radius: 5px;
 	border: 0px;
 	height: 30px;
-	width: 34px;
 }
+
+.time-button {
+	margin-top: 15px;
+	background-color: transparent;
+	border: 3px solid #bacbd4;
+	border-radius: 30px;
+	-webkit-transition: all .15s ease-in-out;
+	transition: all .15s ease-in-out;
+	color: #bacbd4;  
+	box-sizing: border-box;
+	cursor: pointer;
+	display: inline-block;
+	font-family: "Amazon Ember",sans-serif;
+	font-size: 13px;
+	line-height: 29px;
+	padding: 0 10px 0 11px;
+	position: relative;
+	text-align: center;
+	text-decoration: none;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: manipulation;
+	vertical-align: middle;
+	width: 100px;
+}
+
+.time-button:hover:enabled {
+	box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
+	border: 3px solid #00d7c3;
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  color: #666666;
+}
+
+.error {
+	padding: 10px;
+  	margin: 10px;
+	color: #ba3939;
+	background: #ffe0e0;
+	border: 1px solid #a33a3a;
+	display: none;
+  }
 
 #x_axis_map_descriptors_selector {
 	margin-top: 3px;
