@@ -21,6 +21,12 @@ canvas{
 	opacity: 0.9;
 }
 
+#login{
+	border-radius: 5px;
+	height: 30px;
+	margin-bottom: 10px;
+}
+
 .box a {
 	color: #fff;
 }
@@ -182,7 +188,7 @@ button[disabled]{
 }
 
 #info_placeholder{
-	/*height: 30px;*/
+/*height: 30px;*/
 	line-height: 30px;
 }
 

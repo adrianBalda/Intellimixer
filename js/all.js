@@ -1,5 +1,11 @@
 /* Global variables and objects */
 
+// Login data
+const client_id = "hKJVa3zDGN30ZZlkgNLB";
+const client_secret = "hduZUz2dPHXv8fM92PbVpLPKW4Ua3PjP8XirqDi1";
+const redirect_url = 'https://freesound.org/home/app_permissions/permission_granted/';
+let code = new URLSearchParams(window.location.search).get('code');
+
 // Variational Autoencoder stuff
 let encoderModel = undefined;
 let decoderModel = undefined;
@@ -19,6 +25,7 @@ let audio_manager = new AudioManager();
 let MONO_MODE = true;
 
 // Sounds and content
+let queryForm = document.getElementById('query-form');
 let default_query = "footstep";
 let minDuration = 1;
 let maxDuration = 2;
@@ -110,7 +117,7 @@ function start() {
   if (query == undefined || query == "") {
     query = default_query;
   }
-
+  
   let url =
     "https://freesound.org/apiv2/search/text/?query=" +
     query +
@@ -217,6 +224,32 @@ function initLantentSpaceVariableSelector(latentSpaceDimension) {
   setMapDescriptor(true);
   update_axis_labels();
 })();
+
+function freesoundLogin() {
+  const scope = 'read';
+  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + encodeURIComponent(redirect_url) + '&scope=' + scope;
+  console.log(auth_url)
+  window.location.href = auth_url;
+}
+
+function getToken(){
+  let code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://freesound.org/apiv2/oauth2/access_token/', true);
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        var access_token = response.access_token;
+        // Token de acceso para hacer peticiones a la API de Freesound
+        console.log('Token de acceso:', access_token);
+      }
+    };
+    var params = 'grant_type=authorization_code&code=' + code + '&client_id=' + client_id + '&client_secret=' + client_secret;
+    xhr.send(params);
+  }
+}
 
 (function loop() {
   // This is called when code reaches this point
@@ -685,7 +718,7 @@ function draw() {
     event.preventDefault();
     start();
   };
-  document.getElementById("query-form").onsubmit = formSubmitHandler;
+  queryForm.onsubmit = formSubmitHandler;
 })();
 
 // axis text label drawing
