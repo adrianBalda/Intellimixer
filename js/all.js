@@ -5,6 +5,7 @@ const client_id = "J3QbU7A9Mt9wQbqYMRo9";
 const client_secret = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const redirect_url = 'https://adrianbalda.github.io/soundview1.github.io/';
 let userCode;
+let accessToken;
 const defaultToken = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
 
 // Variational Autoencoder stuff
@@ -129,7 +130,7 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ defaultToken + "&page=2";
+    "&token="+ (accessToken ? accessToken.access_token : defaultToken) + "&page=2";
 
   console.log(url)
   loadJSON(function (data) {
@@ -151,7 +152,7 @@ function showUser(userName) {
 window.addEventListener('load', async function() {
   userCode = getCodeFromURL();
   console.log(userCode);
-  const accessToken = await getAccessToken();
+  accessToken = await getAccessToken();
   console.log(accessToken);
 });
 
