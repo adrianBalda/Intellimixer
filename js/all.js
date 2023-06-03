@@ -148,7 +148,7 @@ function showUser(userName) {
 	userNameElement.textContent = userName;
 }
 
-window.addEventListener('load', function() {
+window.addEventListener('load', async function() {
   userCode = getCodeFromURL();
   console.log(userCode);
   const accessToken = await getAccessToken();
