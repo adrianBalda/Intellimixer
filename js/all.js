@@ -153,7 +153,8 @@ window.addEventListener('load', async function() {
   userCode = getCodeFromURL();
   console.log(userCode);
   accessToken = await getAccessToken();
-  console.log(accessToken);
+  const userName = getUserInfo(accessToken.access_token);
+  showUser(userName)
 });
 
 function checkDurations() {
