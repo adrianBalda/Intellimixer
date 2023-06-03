@@ -129,7 +129,7 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ (userCode ? userCode : defaultToken) + "&page=2";
+    "&token="+ defaultToken + "&page=2";
 
   console.log(url)
   loadJSON(function (data) {
@@ -151,7 +151,7 @@ function showUser(userName) {
 window.addEventListener('load', function() {
   userCode = getCodeFromURL();
   console.log(userCode);
-  const accessToken = getAccessToken();
+  const accessToken = await getAccessToken();
   console.log(accessToken);
 });
 
