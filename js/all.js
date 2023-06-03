@@ -141,19 +141,32 @@ function freesoundLogin() {
   window.location.href = auth_url;
 }
 
+function showUser(userName) {
+	const loginButton = document.getElementById('login');
+	const userContainer = document.getElementById('userContainer');
+	const userNameElement = document.getElementById('userName');
+
+	loginButton.style.display = 'none';
+
+	userContainer.style.display = 'block';
+	userNameElement.textContent = userName;
+}
+
 function getToken(){
   let code = new URLSearchParams(window.location.search).get('code');
   if (code) {
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://freesound.org/apiv2/oauth2/access_token/', true);
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        var response = JSON.parse(xhr.responseText);
-        var access_token = response.access_token;
+        const response = JSON.parse(xhr.responseText);
+        const access_token = response.access_token;
+        const userName = response.user.username;
+				showUser(userName);
       }
     };
-    var params = 'grant_type=authorization_code&code=' + code + '&client_id=' + client_id + '&client_secret=' + client_secret;
+    const params = 'grant_type=authorization_code&code=' + code + '&client_id=' + client_id + '&client_secret=' + client_secret;
     xhr.send(params);
   }
 }
