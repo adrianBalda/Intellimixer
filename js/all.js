@@ -135,8 +135,17 @@ function start() {
   console.log(url)
   loadJSON(function (data) {
     load_data_from_fs_json(data);
-  }, url, accessToken.access_token);
+  }, url, accessToken?.access_token);
 }
+
+window.addEventListener('load', async function() {
+  userCode = getCodeFromURL();
+  console.log(userCode);
+  accessToken = await getAccessToken();
+  getUserInfo(accessToken.access_token, function(userName) {
+    showUser(userName)
+  });
+});
 
 function showUser(userName) {
 	const loginButton = document.getElementById('login');
@@ -148,14 +157,6 @@ function showUser(userName) {
 	userContainer.style.display = 'block';
 	userNameElement.textContent = userName;
 }
-
-window.addEventListener('load', async function() {
-  userCode = getCodeFromURL();
-  console.log(userCode);
-  accessToken = await getAccessToken();
-  const userName = getUserInfo(accessToken.access_token);
-  showUser(userName)
-});
 
 function checkDurations() {
   const submitBtn = document.getElementById("submit-btn");
