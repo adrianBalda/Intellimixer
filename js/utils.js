@@ -156,11 +156,14 @@ function rgbToHex(r, g, b) {
 
 /* JSON requests */
 
-function loadJSON(callback, url) {
+function loadJSON(callback, url, accessToken) {
   logInfo("Querying Freesound.");
   var xhr = new XMLHttpRequest();
   xhr.open("get", url, true);
   xhr.responseType = "json";
+  if(accessToken)
+    xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+
   xhr.onload = function () {
     var status = xhr.status;
     n_pages_received += 1;
@@ -180,7 +183,7 @@ function loadJSON(callback, url) {
 
 function freesoundLogin() {
   const scope = 'read';
-  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + encodeURIComponent(redirect_url) + '&scope=' + scope;
+  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + CLIENT_ID + '&response_type=code&redirect_uri=' + encodeURIComponent(REDIRECT_URL) + '&scope=' + scope;
   window.location.href = auth_url;
 }
 
@@ -193,11 +196,11 @@ async function getAccessToken(){
   const url = 'https://freesound.org/apiv2/oauth2/access_token/';
 
   const data = new URLSearchParams();
-  data.append('client_id', client_id);
-  data.append('client_secret', client_secret);
+  data.append('client_id', CLIENT_ID);
+  data.append('client_secret', CLIENT_SECRET);
   data.append('grant_type', 'authorization_code');
   data.append('code', userCode);
-  
+
   try{
     const response = await fetch(url, {
       method: 'POST',
