@@ -189,6 +189,33 @@ function getCodeFromURL() {
   return urlParams.get('code');
 }
 
+function getAccessToken(){
+  const url = 'https://freesound.org/apiv2/oauth2/access_token/';
+
+  const data = new URLSearchParams();
+  data.append('client_id', client_id);
+  data.append('client_secret', client_secret);
+  data.append('grant_type', 'authorization_code');
+  data.append('code', userCode);
+
+  return fetch(url, {
+    method: 'POST',
+    body: data
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Aquí puedes realizar las acciones necesarias con el token de acceso obtenido
+    console.log(data.access_token);
+    console.log(data.expires_in);
+    // ...
+    return data; // Opcionalmente, puedes devolver el resultado de la solicitud
+  })
+  .catch(error => {
+    // Manejo de errores
+    console.error('Error al obtener el token de acceso:', error);
+    throw error;
+  });
+}
 /* Request parameters */
 
 function get_req_param(name) {

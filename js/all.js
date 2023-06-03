@@ -151,6 +151,8 @@ function showUser(userName) {
 window.addEventListener('load', function() {
   userCode = getCodeFromURL();
   console.log(userCode);
+  const accessToken = getAccessToken();
+  console.log(accessToken);
 });
 
 function checkDurations() {
