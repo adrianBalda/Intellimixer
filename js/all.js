@@ -129,7 +129,7 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ userCode ? userCode : defaultToken + "page=2";
+    "&token="+ (userCode ? userCode : defaultToken) + "&page=2";
 
   console.log(url)
   loadJSON(function (data) {
