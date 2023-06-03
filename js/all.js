@@ -4,7 +4,7 @@
 const client_id = "J3QbU7A9Mt9wQbqYMRo9";
 const client_secret = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const redirect_url = 'https://adrianbalda.github.io/soundview1.github.io/';
-let code = new URLSearchParams(window.location.search).get('code');
+let userCode;
 
 // Variational Autoencoder stuff
 let encoderModel = undefined;
@@ -135,12 +135,6 @@ function start() {
   }, url);
 }
 
-function freesoundLogin() {
-  const scope = 'read';
-  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + encodeURIComponent(redirect_url) + '&scope=' + scope;
-  window.location.href = auth_url;
-}
-
 function showUser(userName) {
 	const loginButton = document.getElementById('login');
 	const userContainer = document.getElementById('userContainer');
@@ -152,24 +146,10 @@ function showUser(userName) {
 	userNameElement.textContent = userName;
 }
 
-function getToken(){
-  let code = new URLSearchParams(window.location.search).get('code');
-  if (code) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://freesound.org/apiv2/oauth2/access_token/', true);
-    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        const access_token = response.access_token;
-        const userName = response.user.username;
-				showUser(userName);
-      }
-    };
-    const params = 'grant_type=authorization_code&code=' + code + '&client_id=' + client_id + '&client_secret=' + client_secret;
-    xhr.send(params);
-  }
-}
+window.addEventListener('load', function() {
+  userCode = getCodeFromURL();
+  console.log(userCode);
+});
 
 function checkDurations() {
   const submitBtn = document.getElementById("submit-btn");

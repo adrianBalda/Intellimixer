@@ -176,6 +176,19 @@ function loadJSON(callback, url) {
   xhr.send();
 }
 
+// Login
+
+function freesoundLogin() {
+  const scope = 'read';
+  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + encodeURIComponent(redirect_url) + '&scope=' + scope;
+  window.location.href = auth_url;
+}
+
+function getCodeFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('code');
+}
+
 /* Request parameters */
 
 function get_req_param(name) {
