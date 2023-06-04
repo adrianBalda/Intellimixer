@@ -220,6 +220,20 @@ async function getAccessToken(){
     throw error;
   }
 }
+
+function getUserInfo(access_token) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://freesound.org/apiv2/me/', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      return response.username;
+    }
+  };
+  xhr.send();
+}
+
 /* Request parameters */
 
 function get_req_param(name) {
