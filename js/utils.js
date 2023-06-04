@@ -236,16 +236,17 @@ function getUserInfo(access_token, callback) {
 
 // Logout
 
-function logoutFreesound(){
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://freesound.org/home/logout/?next=/', true);
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      console.log('Sesión de Freesound cerrada');
-    }
-  };
-  xhr.send();
-}
+// function logoutFreesound(){
+//   const xhr = new XMLHttpRequest();
+//   xhr.open('GET', 'https://freesound.org/home/logout/?next=/', true);
+//   xhr.onreadystatechange = function() {
+//     if (xhr.readyState === 4 && xhr.status === 200) {
+//       console.log('Sesión de Freesound cerrada');
+//     }
+//   };
+//   xhr.send();
+// }
+
 /* Request parameters */
 
 function get_req_param(name) {
