@@ -234,6 +234,21 @@ function getUserInfo(access_token, callback) {
   xhr.send();
 }
 
+// Logout
+
+function logoutFreesound(access_token) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://freesound.org/apiv2/oauth2/revoke_token/', true);
+  xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      // Realizar cualquier otra acción necesaria después de cerrar la sesión
+      console.log('Sesión cerrada');
+    }
+  };
+  xhr.send('token=' + access_token);
+}
+
 /* Request parameters */
 
 function get_req_param(name) {
