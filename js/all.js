@@ -4,7 +4,7 @@
 const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
 const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const REDIRECT_URL = 'https://adrianbalda.github.io/soundview1.github.io/';
-let userCode;
+let AUTHORIZATION_CODE;
 let accessToken;
 const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
 
@@ -139,8 +139,7 @@ function start() {
 }
 
 window.addEventListener('load', async function() {
-  userCode = getCodeFromURL();
-  console.log(userCode);
+  AUTHORIZATION_CODE = getCodeFromURL();
   accessToken = await getAccessToken();
   getUserInfo(accessToken.access_token, function(userName) {
     showUser(userName)
@@ -161,7 +160,8 @@ function showUser(userName) {
 }
 
 function logout() {
-  logoutFreesound(accessToken.access_token);
+  accessToken = undefined;
+  AUTHORIZATION_CODE = undefined;
   const loginButton = document.getElementById('login');
   const userContainer = document.getElementById('userContainer');
   const userNameElement = document.getElementById('userName');
@@ -172,6 +172,7 @@ function logout() {
   userNameElement.textContent = '';
   logoutButton.style.display = 'none';
 }
+
 function checkDurations() {
   const submitBtn = document.getElementById("submit-btn");
   const errorMessage = document.getElementById("error-message");
