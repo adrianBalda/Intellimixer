@@ -1,12 +1,12 @@
 /* Global variables and objects */
 
 // Login data
-const client_id = "J3QbU7A9Mt9wQbqYMRo9";
-const client_secret = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
-const redirect_url = 'https://adrianbalda.github.io/soundview1.github.io/';
+const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
+const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
+const REDIRECT_URL = 'https://adrianbalda.github.io/soundview1.github.io/';
 let userCode;
 let accessToken;
-const defaultToken = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
 
 // Variational Autoencoder stuff
 let encoderModel = undefined;
@@ -130,12 +130,12 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ (accessToken ? accessToken.access_token : defaultToken) + "&page=2";
-
+    "&token="+ DEFAULT_TOKEN + "&page=2";
+    
   console.log(url)
   loadJSON(function (data) {
     load_data_from_fs_json(data);
-  }, url);
+  }, url, accessToken.access_token);
 }
 
 function showUser(userName) {
