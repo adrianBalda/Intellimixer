@@ -1,5 +1,11 @@
 /* Global variables and objects */
 
+// Login data
+const client_id = "J3QbU7A9Mt9wQbqYMRo9";
+const client_secret = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
+const redirect_url = 'https://adrianbalda.github.io/soundview1.github.io/';
+let code = new URLSearchParams(window.location.search).get('code');
+
 // Variational Autoencoder stuff
 let encoderModel = undefined;
 let decoderModel = undefined;
@@ -127,6 +133,29 @@ function start() {
   loadJSON(function (data) {
     load_data_from_fs_json(data);
   }, url);
+}
+
+function freesoundLogin() {
+  const scope = 'read';
+  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + client_id + '&response_type=code&redirect_uri=' + encodeURIComponent(redirect_url) + '&scope=' + scope;
+  window.location.href = auth_url;
+}
+
+function getToken(){
+  let code = new URLSearchParams(window.location.search).get('code');
+  if (code) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://freesound.org/apiv2/oauth2/access_token/', true);
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        var access_token = response.access_token;
+      }
+    };
+    var params = 'grant_type=authorization_code&code=' + code + '&client_id=' + client_id + '&client_secret=' + client_secret;
+    xhr.send(params);
+  }
 }
 
 function checkDurations() {

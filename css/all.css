@@ -25,6 +25,12 @@ canvas{
 	color: #fff;
 }
 
+#login{
+	border-radius: 5px;
+	height: 30px;
+	margin-bottom: 10px;
+}
+
 #query_box {
 	right: 20px;
 	top: 20px;
