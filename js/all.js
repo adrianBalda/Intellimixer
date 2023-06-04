@@ -129,8 +129,7 @@ function start() {
     maxDuration +
     "]&page_size=" +
     numFiles +
-    "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ DEFAULT_TOKEN + "&page=2";
+    "&fields=id,previews,name,analysis,url,username,images&page=2";
     
   console.log(url)
   loadJSON(function (data) {
@@ -160,9 +159,9 @@ function showUser(userName) {
 }
 
 function logout() {
-  accessToken = undefined;
-  AUTHORIZATION_CODE = undefined;
-  logoutFreesound();
+  // accessToken = undefined;
+  // AUTHORIZATION_CODE = undefined;
+  // logoutFreesound();
   const loginButton = document.getElementById('login');
   const userContainer = document.getElementById('userContainer');
   const userNameElement = document.getElementById('userName');
