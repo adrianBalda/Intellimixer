@@ -151,13 +151,27 @@ function showUser(userName) {
 	const loginButton = document.getElementById('login');
 	const userContainer = document.getElementById('userContainer');
 	const userNameElement = document.getElementById('userName');
+  const logoutButton = document.getElementById('logoutButton');
 
 	loginButton.style.display = 'none';
 
 	userContainer.style.display = 'block';
 	userNameElement.textContent = userName;
+  logoutButton.style.display = 'block';
 }
 
+function logout() {
+  logoutFreesound(accessToken.access_token);
+  const loginButton = document.getElementById('login');
+  const userContainer = document.getElementById('userContainer');
+  const userNameElement = document.getElementById('userName');
+  const logoutButton = document.getElementById('logoutButton');
+
+  loginButton.style.display = 'block';
+  userContainer.style.display = 'none';
+  userNameElement.textContent = '';
+  logoutButton.style.display = 'none';
+}
 function checkDurations() {
   const submitBtn = document.getElementById("submit-btn");
   const errorMessage = document.getElementById("error-message");
