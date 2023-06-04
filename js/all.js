@@ -162,6 +162,7 @@ function showUser(userName) {
 function logout() {
   accessToken = undefined;
   AUTHORIZATION_CODE = undefined;
+  logoutFreesound();
   const loginButton = document.getElementById('login');
   const userContainer = document.getElementById('userContainer');
   const userNameElement = document.getElementById('userName');
