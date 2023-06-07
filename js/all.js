@@ -3,7 +3,7 @@
 // Login data
 const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
 const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
-const REDIRECT_URL = "https://adrianbalda.github.io/soundview1.github.io/";
+const REDIRECT_URL = "https://adrianbalda.github.io/soundview1.github.io/"; // Pendiente de cambiar para el dominio definitivo
 let AUTHORIZATION_CODE;
 let accessToken;
 const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
