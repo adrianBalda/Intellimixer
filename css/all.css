@@ -188,8 +188,12 @@ button[disabled]{
 }
 
 #info_placeholder{
-/*height: 30px;*/
+	height: 125px; /* Altura fija del contenedor */
+	width: 80%;
+	overflow-y: scroll;
 	line-height: 30px;
+	border: 3px solid #00d7c3;
+	border-radius: 20px;
 }
 
 #source_placeholder{
