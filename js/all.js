@@ -3,10 +3,18 @@
 // Login data
 const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
 const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
-const REDIRECT_URL = 'https://adrianbalda.github.io/soundview1.github.io/';
+const REDIRECT_URL = "https://adrianbalda.github.io/Intellimixer/";
 let AUTHORIZATION_CODE;
 let accessToken;
 const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+
+//Menú Hamburguesa
+const menuButton = document.querySelector(".menu-button");
+const menuOptions = document.querySelector(".menu-options");
+const menuContainer = document.querySelector(".menu-container");
+const menuHamburguesa = document.getElementById("menuHamburguesa");
+let menuVisible = false;
+// Menú Hamburguesa
 
 // Variational Autoencoder stuff
 let encoderModel = undefined;
@@ -52,6 +60,8 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const queryForm = document.getElementById("query-form");
+const uploadVAEs = document.getElementById('upload-vaes-div');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let w = window.innerWidth;
@@ -130,48 +140,54 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token="+ DEFAULT_TOKEN + "&page=2";
-    
-  console.log(url)
-  loadJSON(function (data) {
-    load_data_from_fs_json(data);
-  }, url, accessToken?.access_token);
+    "&token=" +
+    DEFAULT_TOKEN +
+    "&page=2";
+
+  console.log(url);
+  loadJSON(
+    function (data) {
+      load_data_from_fs_json(data);
+    },
+    url,
+    accessToken?.access_token
+  );
 }
 
-window.addEventListener('load', async function() {
+window.addEventListener("load", async function () {
   AUTHORIZATION_CODE = getCodeFromURL();
   accessToken = await getAccessToken();
-  getUserInfo(accessToken.access_token, function(userName) {
-    showUser(userName)
+  getUserInfo(accessToken.access_token, function (userName) {
+    showUser(userName);
   });
 });
 
 function showUser(userName) {
-	const loginButton = document.getElementById('login');
-	const userContainer = document.getElementById('userContainer');
-	const userNameElement = document.getElementById('userName');
-  const logoutButton = document.getElementById('logoutButton');
+  const loginButton = document.getElementById("login");
+  const userContainer = document.getElementById("userContainer");
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
 
-	loginButton.style.display = 'none';
+  loginButton.style.display = "none";
 
-	userContainer.style.display = 'block';
-	userNameElement.textContent = userName;
-  logoutButton.style.display = 'block';
+  userContainer.style.display = "block";
+  userNameElement.textContent = userName;
+  logoutButton.style.display = "block";
 }
 
 function logout() {
   // accessToken = undefined;
   // AUTHORIZATION_CODE = undefined;
   // logoutFreesound();
-  const loginButton = document.getElementById('login');
-  const userContainer = document.getElementById('userContainer');
-  const userNameElement = document.getElementById('userName');
-  const logoutButton = document.getElementById('logoutButton');
+  const loginButton = document.getElementById("login");
+  const userContainer = document.getElementById("userContainer");
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
 
-  loginButton.style.display = 'block';
-  userContainer.style.display = 'none';
-  userNameElement.textContent = '';
-  logoutButton.style.display = 'none';
+  loginButton.style.display = "block";
+  userContainer.style.display = "none";
+  userNameElement.textContent = "";
+  logoutButton.style.display = "none";
 }
 
 function checkDurations() {
@@ -183,7 +199,8 @@ function checkDurations() {
   const input_maxDuration = parseInt(
     document.getElementById("query_max_time_input").value
   );
-  const mensajeError = "Invalid range for the sounds: Minimum range must be lower than maximum range!";
+  const mensajeError =
+    "Invalid range for the sounds!";
 
   if (input_minDuration) {
     minDuration = input_minDuration;
@@ -202,6 +219,85 @@ function checkDurations() {
     errorMessage.style.display = "none";
   }
 }
+
+let formSubmitHandler = function formSubmitHandler(event) {
+  event.preventDefault();
+  start();
+  hideForm();
+  hideUploadVAEs()
+};
+queryForm.onsubmit = formSubmitHandler;
+
+menuButton.addEventListener("click", function (event) {
+  event.stopPropagation();
+  if (menuVisible) {
+    hideMenu();
+  } else {
+    showMenu();
+  }
+});
+
+document.addEventListener("click", function () {
+  if (menuVisible) {
+    hideMenu();
+  }
+});
+
+document.getElementById('new-sound').addEventListener('click', function(event) {
+  event.preventDefault();
+  showForm();
+  hideMenu();
+});
+
+document.getElementById('submit-btn').addEventListener('click', formSubmitHandler);
+
+function showMenu() {
+  if (queryForm.style.display === "block") {
+    queryForm.style.display = "none";
+  }
+
+  if (uploadVAEs.style.display === "block") {
+    uploadVAEs.style.display = "none";
+  }
+
+  menuOptions.style.visibility = "visible";
+  menuVisible = true;
+}
+
+function hideMenu() {
+  menuOptions.style.visibility = "hidden";
+  menuVisible = false;
+}
+
+function showForm() {
+  queryForm.style.display = 'block';
+}
+
+function hideForm() {
+  queryForm.style.display = 'none';
+}
+
+menuContainer.addEventListener("click", function (event) {
+  event.stopPropagation();
+});
+
+function showUploadVAEs() {
+  uploadVAEs.style.display = 'block';
+}
+
+function hideUploadVAEs() {
+  uploadVAEs.style.display = 'none';
+}
+
+document.getElementById('upload-vaes').addEventListener('click', function(event) {
+  event.preventDefault();
+  showUploadVAEs();
+  hideMenu();
+});
+
+document.getElementById('confirm-btn').addEventListener('click', function() {
+  uploadVAEs.style.display = 'none';
+});
 
 function changeAxisAttribute() {
   all_loaded = false;
@@ -554,10 +650,7 @@ function getSoundFromId(sound_id) {
 
 function showSoundInfo(sound) {
   let html = "";
-  if (
-    sound.image !== undefined &&
-    sound.image !== ""
-  ) {
+  if (sound.image !== undefined && sound.image !== "") {
     html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
   }
   html +=

@@ -14,7 +14,20 @@
             Bienvenido, <span id="userName"></span>
             <button id="logoutButton" onclick="logout()">Cerrar sesión</button>
         </div>
-        <form id="query-form" class="query-form">
+        <div class="menu-container">
+            <div class="menu-button">
+                <span class="menu-bar"></span>
+                <span class="menu-bar"></span>
+                <span class="menu-bar"></span>
+            </div>
+            <ul id="menuHamburguesa" class="menu-options">
+                <li id="new-sound"><a href="#">New Sound</a></li>
+                <li id="upload-vaes"><a href="#">Upload VAE´s</a></li>
+                <!-- <li id="opcion3"><a href="#">Opción 3</a></li> -->
+            </ul>
+        </div>
+
+        <form id="query-form" class="query-form" style="display: none;">
             <form>
                 <input id="query_terms_input" type="text" placeholder="Footstep">
                 <p><br>Select minimum sounds duration (in seconds)</p>
@@ -29,14 +42,8 @@
                 <p id="error-message" class="error"></p>
             </form>
 
-            <p><br>Select x-axis attribute</p>
-            <select id="x_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
-            </select>
-            <p><br>Select y-axis attribute</p>
-            <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
-            </select>
         </form>
-        <div>
+        <div id="upload-vaes-div" style="display: none;">
             <br><br>
             <input type="file" id="upload-encoder-json" class="hidden" />
             <label for="upload-encoder-json">Select encoder json file</label>
@@ -53,6 +60,14 @@
             <button onclick="getUserUploadedModel()">Confirm</button>
         </div>
         <br>
+        <div class="axis">
+            <p><br>Select x-axis attribute</p>
+            <select id="x_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
+            </select>
+            <p><br>Select y-axis attribute</p>
+            <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
+            </select>
+        </div>
         <div id="info_placeholder"></div>
         <div id="waveform" style="display: none !important;"></div>
     </div>
