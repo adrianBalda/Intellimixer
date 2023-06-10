@@ -68,17 +68,37 @@
             <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
             </select>
         </div>
-        <div id="info_placeholder"></div>
+        <div class="center-con">
+            <div class="round">
+                <div id="cta">
+                    <span class="arrow first next "></span>
+                    <span class="arrow second next "></span>
+                </div>
+            </div>
+            <div id="sidebar">
+                    <p class="transformation-tittle">Sounds Transformations</p>
+                    <div class="inputs-containers">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                    </div>
+            </div>
+        </div>        
+        <div id="info_placeholder">
+            <div class="scroll-info-placeholder"></div>
+        </div>
         <div id="waveform" style="display: none !important;"></div>
     </div>
     <hr>
-
+    
     <div id="instructions_box" class="box">
         Click on points to listen to sounds<br>
         Click on the area to listen to generate new sounds<br>
         Click + drag to navigate the map<br>
         Scroll wheel to zoom<br>
-    </div>
+    </div>  
 
     <div id="x_axis_box" class="box">
 
