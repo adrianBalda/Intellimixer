@@ -32,6 +32,7 @@ function encodeAudio(arangedSpectrogram) {
 }
 
 async function getUserUploadedModel() {
+    uploadVAEs.style.display = 'none';
     const uploadEncoderJson = document.getElementById('upload-encoder-json');
     const uploadEncoderWeights = document.getElementById('upload-encoder-weights');
     const uploadDecoderJson = document.getElementById('upload-decoder-json');

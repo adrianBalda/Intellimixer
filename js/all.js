@@ -60,6 +60,9 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const arrowButton = document.querySelector(".round");
+const sidebar = document.getElementById("sidebar");
+const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
 let canvas = document.querySelector("canvas");
@@ -190,35 +193,13 @@ function logout() {
   logoutButton.style.display = "none";
 }
 
-function checkDurations() {
-  const submitBtn = document.getElementById("submit-btn");
-  const errorMessage = document.getElementById("error-message");
-  const input_minDuration = parseInt(
-    document.getElementById("query_min_time_input").value
-  );
-  const input_maxDuration = parseInt(
-    document.getElementById("query_max_time_input").value
-  );
-  const mensajeError =
-    "Invalid range for the sounds!";
+arrowButton.addEventListener("click", function() {
+  sidebar.classList.toggle("expanded");
+  arrowButton.classList.toggle("expanded");
 
-  if (input_minDuration) {
-    minDuration = input_minDuration;
-  }
-
-  if (input_maxDuration) {
-    maxDuration = input_maxDuration;
-  }
-
-  if (minDuration >= maxDuration) {
-    submitBtn.disabled = true;
-    errorMessage.innerHTML = mensajeError;
-    errorMessage.style.display = "block";
-  } else {
-    submitBtn.disabled = false;
-    errorMessage.style.display = "none";
-  }
-}
+  const expanded = sidebar.classList.contains("expanded");
+  slideButton(expanded)
+});
 
 let formSubmitHandler = function formSubmitHandler(event) {
   event.preventDefault();
@@ -237,6 +218,10 @@ menuButton.addEventListener("click", function (event) {
   }
 });
 
+menuContainer.addEventListener("click", function (event) {
+  event.stopPropagation();
+});
+
 document.addEventListener("click", function () {
   if (menuVisible) {
     hideMenu();
@@ -251,52 +236,10 @@ document.getElementById('new-sound').addEventListener('click', function(event) {
 
 document.getElementById('submit-btn').addEventListener('click', formSubmitHandler);
 
-function showMenu() {
-  if (queryForm.style.display === "block") {
-    queryForm.style.display = "none";
-  }
-
-  if (uploadVAEs.style.display === "block") {
-    uploadVAEs.style.display = "none";
-  }
-
-  menuOptions.style.visibility = "visible";
-  menuVisible = true;
-}
-
-function hideMenu() {
-  menuOptions.style.visibility = "hidden";
-  menuVisible = false;
-}
-
-function showForm() {
-  queryForm.style.display = 'block';
-}
-
-function hideForm() {
-  queryForm.style.display = 'none';
-}
-
-menuContainer.addEventListener("click", function (event) {
-  event.stopPropagation();
-});
-
-function showUploadVAEs() {
-  uploadVAEs.style.display = 'block';
-}
-
-function hideUploadVAEs() {
-  uploadVAEs.style.display = 'none';
-}
-
 document.getElementById('upload-vaes').addEventListener('click', function(event) {
   event.preventDefault();
   showUploadVAEs();
   hideMenu();
-});
-
-document.getElementById('confirm-btn').addEventListener('click', function() {
-  uploadVAEs.style.display = 'none';
 });
 
 function changeAxisAttribute() {

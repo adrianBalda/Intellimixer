@@ -334,3 +334,105 @@ Object.byString = function (o, s) {
   }
   return o;
 };
+
+// Main menu
+function showMenu() {
+  if (queryForm.style.display === "block") {
+    queryForm.style.display = "none";
+  }
+
+  if (uploadVAEs.style.display === "block") {
+    uploadVAEs.style.display = "none";
+  }
+
+  menuOptions.style.visibility = "visible";
+  menuVisible = true;
+}
+
+function hideMenu() {
+  menuOptions.style.visibility = "hidden";
+  menuVisible = false;
+}
+
+function showForm() {
+  queryForm.style.display = 'block';
+}
+
+function hideForm() {
+  queryForm.style.display = 'none';
+}
+
+function showUploadVAEs() {
+  uploadVAEs.style.display = 'block';
+}
+
+function hideUploadVAEs() {
+  uploadVAEs.style.display = 'none';
+}
+
+// Check sounds request durations
+function checkDurations() {
+  const submitBtn = document.getElementById("submit-btn");
+  const errorMessage = document.getElementById("error-message");
+  const input_minDuration = parseInt(
+    document.getElementById("query_min_time_input").value
+  );
+  const input_maxDuration = parseInt(
+    document.getElementById("query_max_time_input").value
+  );
+  const mensajeError =
+    "Invalid range for the sounds!";
+
+  if (input_minDuration) {
+    minDuration = input_minDuration;
+  }
+
+  if (input_maxDuration) {
+    maxDuration = input_maxDuration;
+  }
+
+  if (minDuration >= maxDuration) {
+    submitBtn.disabled = true;
+    errorMessage.innerHTML = mensajeError;
+    errorMessage.style.display = "block";
+  } else {
+    submitBtn.disabled = false;
+    errorMessage.style.display = "none";
+  }
+}
+
+// Slide button functions
+function slideButton(expanded){
+  const arrowElements = document.querySelectorAll("#cta .arrow");
+  const nextElements = document.querySelectorAll(".next");
+
+  if (expanded) {
+    if (queryForm.style.display === "block") {
+      hideForm();
+    }
+  
+    if (uploadVAEs.style.display === "block") {
+      hideUploadVAEs();
+    }
+  
+    nextElements.forEach(element => {
+      element.style.transform = "none";
+    });
+    arrowElements.forEach(element => {
+      element.style.left = "30%";
+    });
+    transformationInputs.forEach(element => {
+      element.style.display = "block";
+    });
+  } else {
+    nextElements.forEach(element => {
+      element.style.transform = "";
+    });
+    arrowElements.forEach(element => {
+      element.style.left = "20%";
+    });
+    transformationInputs.forEach(element => {
+      element.style.display = "none";
+    });
+  }
+}
