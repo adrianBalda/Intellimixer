@@ -57,7 +57,12 @@ function computeEuclideanDistance3d(p1x, p1y, p1z, p2x, p2y, p2z) {
 }
 
 function logInfo(text) {
-    document.getElementById('info_placeholder').innerHTML += "<div>" + text + "</div>";
+    const logElement = document.createElement("div");
+    logElement.innerText = "[" + new Date().toLocaleTimeString() + "] " + text;
+
+    // Agrega el elemento al contenedor de logs
+    let logContainer = document.getElementById("info_placeholder");
+    logContainer.insertBefore(logElement, logContainer.firstChild);
 }
 
 function logInfoWithProgressBar(id, text, value) {
