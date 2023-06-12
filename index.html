@@ -1,14 +1,26 @@
 <html>
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbral Searching</title>
     <link rel="stylesheet" type="text/css" href="css/all.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,500' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-JvO69Jz5g5d5V5FLt60OvX9Xzg8iYF2QZCxMCaPmJfeDw5rq5d5yfxpZYyZYJDe9BUji17fIY2HBL+oZnM2Bw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
+
 <body onload="start();">
     <canvas></canvas>
 
     <div id="query_box" class="box">
+        <button onclick="freesoundLogin()" id="login">Login</button>
+        <div id="userContainer" style="display: none;">
+            Bienvenido, <span id="userName"></span>
+            <button id="logoutButton" onclick="logout()">Cerrar sesión</button>
+        </div>
+
         <form id="query-form" class="query-form">
             <form>
                 <input id="query_terms_input" type="text" placeholder="Footstep">
@@ -84,7 +96,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"
         integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@6.6"></script>
+    <!-- <script src="https://unpkg.com/wavesurfer.js@beta/dist/wavesurfer.min.js"></script> -->
+    <script src="https://unpkg.com/wavesurfer.js@beta/dist/plugins/spectrogram.js"></script>
     <script src="https://unpkg.com/multilateration"></script>
     <script type="text/javascript" src="dist/async.min.js"></script>
     <script type="text/javascript" src="dist/mclt.js"></script>
@@ -101,4 +115,5 @@
     <script src="dist/fft.js"></script>
 
 </body>
+
 </html>

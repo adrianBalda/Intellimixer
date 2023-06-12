@@ -1,5 +1,13 @@
 /* Global variables and objects */
 
+// Login data
+const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
+const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
+const REDIRECT_URL = "https://adrianbalda.github.io/soundview1.github.io/"; // Pendiente de cambiar para el dominio definitivo
+let AUTHORIZATION_CODE;
+let accessToken;
+const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+
 // Variational Autoencoder stuff
 let encoderModel = undefined;
 let decoderModel = undefined;
@@ -19,6 +27,7 @@ let audio_manager = new AudioManager();
 let MONO_MODE = true;
 
 // Sounds and content
+let queryForm = document.getElementById("query-form");
 let default_query = "footstep";
 let minDuration = 1;
 let maxDuration = 2;
@@ -122,11 +131,53 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=2";
+    "&token=" +
+    DEFAULT_TOKEN +
+    "&page=2";
 
-  loadJSON(function (data) {
-    load_data_from_fs_json(data);
-  }, url);
+  loadJSON(
+    function (data) {
+      load_data_from_fs_json(data);
+    },
+    url,
+    accessToken?.access_token
+  );
+}
+
+window.addEventListener("load", async function () {
+  AUTHORIZATION_CODE = getCodeFromURL();
+  accessToken = await getAccessToken();
+  getUserInfo(accessToken.access_token, function (userName) {
+    showUser(userName);
+  });
+});
+
+function showUser(userName) {
+  const loginButton = document.getElementById("login");
+  const userContainer = document.getElementById("userContainer");
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
+
+  loginButton.style.display = "none";
+
+  userContainer.style.display = "block";
+  userNameElement.textContent = userName;
+  logoutButton.style.display = "block";
+}
+
+function logout() {
+  // accessToken = undefined;
+  // AUTHORIZATION_CODE = undefined;
+  // logoutFreesound();
+  const loginButton = document.getElementById("login");
+  const userContainer = document.getElementById("userContainer");
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
+
+  loginButton.style.display = "block";
+  userContainer.style.display = "none";
+  userNameElement.textContent = "";
+  logoutButton.style.display = "none";
 }
 
 function checkDurations() {
@@ -138,7 +189,8 @@ function checkDurations() {
   const input_maxDuration = parseInt(
     document.getElementById("query_max_time_input").value
   );
-  const mensajeError = "Invalid range for the sounds: Minimum range must be lower than maximum range!";
+  const mensajeError =
+    "Invalid range for the sounds: Minimum range must be lower than maximum range!";
 
   if (input_minDuration) {
     minDuration = input_minDuration;
@@ -217,6 +269,11 @@ function initLantentSpaceVariableSelector(latentSpaceDimension) {
   setMapDescriptor(true);
   update_axis_labels();
 })();
+
+window.addEventListener("load", function () {
+  userCode = getCodeFromURL();
+  console.log(userCode);
+});
 
 (function loop() {
   // This is called when code reaches this point
@@ -509,10 +566,7 @@ function getSoundFromId(sound_id) {
 
 function showSoundInfo(sound) {
   let html = "";
-  if (
-    sound.image !== undefined &&
-    sound.image !== ""
-  ) {
+  if (sound.image !== undefined && sound.image !== "") {
     html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
   }
   html +=
@@ -685,7 +739,7 @@ function draw() {
     event.preventDefault();
     start();
   };
-  document.getElementById("query-form").onsubmit = formSubmitHandler;
+  queryForm.onsubmit = formSubmitHandler;
 })();
 
 // axis text label drawing

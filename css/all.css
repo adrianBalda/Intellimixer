@@ -21,6 +21,12 @@ canvas{
 	opacity: 0.9;
 }
 
+#login{
+	border-radius: 5px;
+	height: 30px;
+	margin-bottom: 10px;
+}
+
 .box a {
 	color: #fff;
 }
@@ -188,26 +194,6 @@ button[disabled]{
 	line-height: 30px;
 	border: 3px solid #00d7c3;
 	border-radius: 20px;
-}
-
-#info_placeholder div{
-	margin-left: 10px;
-}
-
-#info_placeholder::-webkit-scrollbar {
-	width: 8px;
-	background-color: #f5f5f5;
-	border-radius: 4px;
-}
-  
-#info_placeholder::-webkit-scrollbar-thumb {
-	background-color: #555;
-	border-radius: 4px;
-}
-
-#info_placeholder::-webkit-scrollbar-thumb:hover {
-	background-color: #333;
-}
 
 #source_placeholder{
 	height: 30px;

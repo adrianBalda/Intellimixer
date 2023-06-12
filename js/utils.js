@@ -156,11 +156,14 @@ function rgbToHex(r, g, b) {
 
 /* JSON requests */
 
-function loadJSON(callback, url) {
+function loadJSON(callback, url, accessToken) {
   logInfo("Querying Freesound.");
   var xhr = new XMLHttpRequest();
   xhr.open("get", url, true);
   xhr.responseType = "json";
+  if(accessToken)
+    xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+
   xhr.onload = function () {
     var status = xhr.status;
     n_pages_received += 1;
@@ -171,6 +174,61 @@ function loadJSON(callback, url) {
       console.log(
         "Error getting data from Freesound, status code: " + xhr.status
       );
+    }
+  };
+  xhr.send();
+}
+
+// Login
+
+function freesoundLogin() {
+  const scope = 'read';
+  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + CLIENT_ID + '&response_type=code&redirect_uri=' + encodeURIComponent(REDIRECT_URL) + '&scope=' + scope;
+  window.location.href = auth_url;
+}
+
+function getCodeFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('code');
+}
+
+async function getAccessToken(){
+  const url = 'https://freesound.org/apiv2/oauth2/access_token/';
+
+  const data = new URLSearchParams();
+  data.append('client_id', CLIENT_ID);
+  data.append('client_secret', CLIENT_SECRET);
+  data.append('grant_type', 'authorization_code');
+  data.append('code', AUTHORIZATION_CODE);
+
+  try{
+    const response = await fetch(url, {
+      method: 'POST',
+      body: data
+    });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener el token de acceso: ' + response.status);
+      }
+
+      const responseData = await response.json();
+      console.log(responseData);
+
+      return responseData;
+  } catch (error) {
+    console.error('Error al obtener el token de acceso:', error);
+    throw error;
+  }
+}
+
+function getUserInfo(access_token, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://freesound.org/apiv2/me/', true);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      callback(response.username);
     }
   };
   xhr.send();
