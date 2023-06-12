@@ -355,19 +355,19 @@ function hideMenu() {
 }
 
 function showForm() {
-  queryForm.style.display = 'block';
+  queryForm.style.display = "block";
 }
 
 function hideForm() {
-  queryForm.style.display = 'none';
+  queryForm.style.display = "none";
 }
 
 function showUploadVAEs() {
-  uploadVAEs.style.display = 'block';
+  uploadVAEs.style.display = "block";
 }
 
 function hideUploadVAEs() {
-  uploadVAEs.style.display = 'none';
+  uploadVAEs.style.display = "none";
 }
 
 // Check sounds request durations
@@ -380,8 +380,7 @@ function checkDurations() {
   const input_maxDuration = parseInt(
     document.getElementById("query_max_time_input").value
   );
-  const mensajeError =
-    "Invalid range for the sounds!";
+  const mensajeError = "Invalid range for the sounds!";
 
   if (input_minDuration) {
     minDuration = input_minDuration;
@@ -402,7 +401,7 @@ function checkDurations() {
 }
 
 // Slide button functions
-function slideButton(expanded){
+function slideButton(expanded) {
   const arrowElements = document.querySelectorAll("#cta .arrow");
   const nextElements = document.querySelectorAll(".next");
 
@@ -410,28 +409,28 @@ function slideButton(expanded){
     if (queryForm.style.display === "block") {
       hideForm();
     }
-  
+
     if (uploadVAEs.style.display === "block") {
       hideUploadVAEs();
     }
-  
-    nextElements.forEach(element => {
+
+    nextElements.forEach((element) => {
       element.style.transform = "none";
     });
-    arrowElements.forEach(element => {
+    arrowElements.forEach((element) => {
       element.style.left = "30%";
     });
-    transformationInputs.forEach(element => {
+    transformationInputs.forEach((element) => {
       element.style.display = "block";
     });
   } else {
-    nextElements.forEach(element => {
+    nextElements.forEach((element) => {
       element.style.transform = "";
     });
-    arrowElements.forEach(element => {
+    arrowElements.forEach((element) => {
       element.style.left = "20%";
     });
-    transformationInputs.forEach(element => {
+    transformationInputs.forEach((element) => {
       element.style.display = "none";
     });
   }

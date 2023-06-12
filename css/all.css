@@ -306,14 +306,14 @@ br {
 
 /* Lateral menu for sounds transformations */
 #sidebar {
-	position: fixed;
-	width: 0;
-	height: 35%;
-	top: 30%;
-	right: 0;
-	background-color: rgb(0, 0, 0);
-	transition: width 0.5s;
-	border-radius: 5%;
+  position: fixed;
+  width: 0;
+  height: 35%;
+  top: 30%;
+  right: 0;
+  background-color: rgb(0, 0, 0);
+  transition: width 0.5s;
+  border-radius: 5%;
 }
 
 #sidebar.expanded {
@@ -323,17 +323,17 @@ br {
 }
 
 .transformation-tittle {
-	top: 3%;
-    text-align: center;
-    position: relative;
-    font-size: 120%;
+  top: 3%;
+  text-align: center;
+  position: relative;
+  font-size: 120%;
 }
 
 .inputs-containers {
-	width: 75%;
-	float: right;
-	position: relative;
-	top: 45%;
+  width: 75%;
+  float: right;
+  position: relative;
+  top: 45%;
 }
 
 .transform-inputs {

@@ -64,7 +64,7 @@ const arrowButton = document.querySelector(".round");
 const sidebar = document.getElementById("sidebar");
 const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
-const uploadVAEs = document.getElementById('upload-vaes-div');
+const uploadVAEs = document.getElementById("upload-vaes-div");
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let w = window.innerWidth;
@@ -193,19 +193,19 @@ function logout() {
   logoutButton.style.display = "none";
 }
 
-arrowButton.addEventListener("click", function() {
+arrowButton.addEventListener("click", function () {
   sidebar.classList.toggle("expanded");
   arrowButton.classList.toggle("expanded");
 
   const expanded = sidebar.classList.contains("expanded");
-  slideButton(expanded)
+  slideButton(expanded);
 });
 
 let formSubmitHandler = function formSubmitHandler(event) {
   event.preventDefault();
   start();
   hideForm();
-  hideUploadVAEs()
+  hideUploadVAEs();
 };
 queryForm.onsubmit = formSubmitHandler;
 
@@ -228,19 +228,25 @@ document.addEventListener("click", function () {
   }
 });
 
-document.getElementById('new-sound').addEventListener('click', function(event) {
-  event.preventDefault();
-  showForm();
-  hideMenu();
-});
+document
+  .getElementById("new-sound")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    showForm();
+    hideMenu();
+  });
 
-document.getElementById('submit-btn').addEventListener('click', formSubmitHandler);
+document
+  .getElementById("submit-btn")
+  .addEventListener("click", formSubmitHandler);
 
-document.getElementById('upload-vaes').addEventListener('click', function(event) {
-  event.preventDefault();
-  showUploadVAEs();
-  hideMenu();
-});
+document
+  .getElementById("upload-vaes")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    showUploadVAEs();
+    hideMenu();
+  });
 
 function changeAxisAttribute() {
   all_loaded = false;
@@ -511,7 +517,7 @@ function checkSelectSound(x, y) {
 
     multilateralDim = multilateralDim[0];
 
-    // var result_array = [];
+    // const result_array = [];
     // for (i = 0; i < 20; i++) {
     //     result_array.push((mu_latent_spaces[0][i] + mu_latent_spaces[1][i] + mu_latent_spaces[2][i]) / 3)
     // }
