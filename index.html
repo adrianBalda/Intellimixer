@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Timbral Searching</title>
+    <title>Intellimixer</title>
     <link rel="stylesheet" type="text/css" href="css/all.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,500' rel='stylesheet' type='text/css'>
 </head>
@@ -9,24 +9,35 @@
     <canvas></canvas>
 
     <div id="query_box" class="box">
-        <button onclick="freesoundLogin()" id="login">Login</button>
-        <div id="userContainer" style="display: none;">
-            Bienvenido, <span id="userName"></span>
-            <button id="logoutButton" onclick="logout()">Cerrar sesión</button>
-        </div>
-        <div class="menu-container">
-            <div class="menu-button">
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
-                <span class="menu-bar"></span>
+        <div id="menu-user-container">
+            <div id="login-container">
+                <button onclick="freesoundLogin()" id="loginButton">Login</button>
             </div>
-            <ul id="menuHamburguesa" class="menu-options">
-                <li id="new-sound"><a href="#">New Sound</a></li>
-                <li id="upload-vaes"><a href="#">Upload VAE´s</a></li>
-                <!-- <li id="opcion3"><a href="#">Opción 3</a></li> -->
-            </ul>
-        </div>
-
+            <div id="logout-user-container" style="display: none;">
+                <div id="user-column">
+                  <div id="userContainer">
+                    Bienvenido, <span id="userName"></span>
+                  </div>
+                </div>
+                <div id="logout-column">
+                    <button id="logoutButton" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <div id="menu-column">
+              <div class="menu-container">
+                <div class="menu-button">
+                  <span class="menu-bar"></span>
+                  <span class="menu-bar"></span>
+                  <span class="menu-bar"></span>
+                </div>
+                <ul id="menuHamburguesa" class="menu-options">
+                  <li id="new-sound"><a href="#">New Sound</a></li>
+                  <li id="upload-vaes"><a href="#">Upload VAE´s</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
         <form id="query-form" class="query-form" style="display: none;">
             <form>
                 <input id="query_terms_input" type="text" placeholder="Footstep">
@@ -101,14 +112,14 @@
     </div>  
 
     <div id="x_axis_box" class="box">
-
     </div>
 
     <div id="y_axis_box" class="box">
-
     </div>
 
     <div id="sound_info_box" class="box">
+        <canvas id="waveform-generated" class="waveform-style"></canvas>
+        <div id="sound_info_content"></div>
     </div>
 
     <div id="logo_box" class="box">
@@ -125,7 +136,7 @@
         integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- <script src="https://unpkg.com/wavesurfer.js@alpha/dist/wavesurfer.min.js"></script>     -->
-    <script src="https://unpkg.com/wavesurfer.js@6.6"></script>
+    <script src="https://unpkg.com/wavesurfer.js@6.6.3/dist/wavesurfer.js"></script>
     <script src="https://unpkg.com/multilateration"></script>
     <script type="text/javascript" src="dist/async.min.js"></script>
     <script type="text/javascript" src="dist/mclt.js"></script>
