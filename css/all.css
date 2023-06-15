@@ -78,6 +78,10 @@ canvas {
 	flex-basis: 30%;
 }
 
+.logout-style {
+	display: none;
+}
+
 #logoutButton {
 	border: 2px solid white;
 	border-radius: 0.7vw;
