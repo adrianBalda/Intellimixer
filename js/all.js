@@ -487,7 +487,7 @@ function load_data_from_fs_json(data) {
       dBData.push(stftData);
       maxValSoundsDB.push(tf.max(stftData).dataSync()[0]);
       // Para el espectrograma
-      
+
       let mclt2Dspec = spectrogram(mcltspecTransposed);
       let { mu_latent_space, log_variance_latent_space } =
         encodeAudio(mclt2Dspec);
