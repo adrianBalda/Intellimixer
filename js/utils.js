@@ -57,12 +57,18 @@ function computeEuclideanDistance3d(p1x, p1y, p1z, p2x, p2y, p2z) {
 }
 
 function logInfo(text) {
-    const logElement = document.createElement("div");
-    logElement.innerText = "[" + new Date().toLocaleTimeString() + "] " + text;
+  const logElement = document.createElement("div");
+  const date = new Date();
+  const timeString = date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-    // Agrega el elemento al contenedor de logs
-    let logContainer = document.getElementById("info_placeholder");
-    logContainer.insertBefore(logElement, logContainer.firstChild);
+  logElement.innerText = "[" + timeString + "]  " + text;
+
+  // Agrega el elemento al contenedor de logs
+  let logContainer = document.getElementById("info_placeholder");
+  logContainer.insertBefore(logElement, logContainer.firstChild);
 }
 
 function logInfoWithProgressBar(id, text, value) {
@@ -161,7 +167,7 @@ function loadJSON(callback, url, accessToken) {
   var xhr = new XMLHttpRequest();
   xhr.open("get", url, true);
   xhr.responseType = "json";
-  if(accessToken)
+  if (accessToken)
     xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
 
   xhr.onload = function () {
@@ -182,57 +188,80 @@ function loadJSON(callback, url, accessToken) {
 // Login
 
 function freesoundLogin() {
-  const scope = 'read';
-  let auth_url = 'https://freesound.org/apiv2/oauth2/authorize/?client_id=' + CLIENT_ID + '&response_type=code&redirect_uri=' + encodeURIComponent(REDIRECT_URL) + '&scope=' + scope;
+  logInfo("Login to Freesound!");
+  const scope = "read";
+  let auth_url =
+    "https://freesound.org/apiv2/oauth2/authorize/?client_id=" +
+    CLIENT_ID +
+    "&response_type=code&redirect_uri=" +
+    encodeURIComponent(REDIRECT_URL) +
+    "&scope=" +
+    scope;
   window.location.href = auth_url;
 }
 
 function getCodeFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('code');
+  return urlParams.get("code");
 }
 
-async function getAccessToken(){
-  const url = 'https://freesound.org/apiv2/oauth2/access_token/';
+async function getAccessToken() {
+  const url = "https://freesound.org/apiv2/oauth2/access_token/";
 
   const data = new URLSearchParams();
-  data.append('client_id', CLIENT_ID);
-  data.append('client_secret', CLIENT_SECRET);
-  data.append('grant_type', 'authorization_code');
-  data.append('code', AUTHORIZATION_CODE);
+  data.append("client_id", CLIENT_ID);
+  data.append("client_secret", CLIENT_SECRET);
+  data.append("grant_type", "authorization_code");
+  data.append("code", AUTHORIZATION_CODE);
 
-  try{
+  try {
     const response = await fetch(url, {
-      method: 'POST',
-      body: data
+      method: "POST",
+      body: data,
     });
 
-      if (!response.ok) {
-        throw new Error('Error al obtener el token de acceso: ' + response.status);
-      }
+    if (!response.ok) {
+      throw new Error(
+        "Error al obtener el token de acceso: " + response.status
+      );
+    }
 
-      const responseData = await response.json();
-      console.log(responseData);
+    const responseData = await response.json();
+    console.log(responseData);
 
-      return responseData;
+    return responseData;
   } catch (error) {
-    console.error('Error al obtener el token de acceso:', error);
+    console.error("Error al obtener el token de acceso:", error);
     throw error;
   }
 }
 
 function getUserInfo(access_token, callback) {
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'https://freesound.org/apiv2/me/', true);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-  xhr.onreadystatechange = function() {
+  xhr.open("GET", "https://freesound.org/apiv2/me/", true);
+  xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+  xhr.onreadystatechange = function () {
     if (xhr.readyState === 4 && xhr.status === 200) {
       const response = JSON.parse(xhr.responseText);
+      logInfo("Welcome " + response.username);
       callback(response.username);
     }
   };
   xhr.send();
 }
+
+// Logout
+
+// function logoutFreesound(){
+//   const xhr = new XMLHttpRequest();
+//   xhr.open('GET', 'https://freesound.org/home/logout/?next=/', true);
+//   xhr.onreadystatechange = function() {
+//     if (xhr.readyState === 4 && xhr.status === 200) {
+//       console.log('Sesión de Freesound cerrada');
+//     }
+//   };
+//   xhr.send();
+// }
 
 /* Request parameters */
 
@@ -305,3 +334,105 @@ Object.byString = function (o, s) {
   }
   return o;
 };
+
+// Main menu
+function showMenu() {
+  if (queryForm.style.display === "block") {
+    queryForm.style.display = "none";
+  }
+
+  if (uploadVAEs.style.display === "block") {
+    uploadVAEs.style.display = "none";
+  }
+
+  menuOptions.style.visibility = "visible";
+  menuVisible = true;
+}
+
+function hideMenu() {
+  menuOptions.style.visibility = "hidden";
+  menuVisible = false;
+}
+
+function showForm() {
+  queryForm.style.display = 'block';
+}
+
+function hideForm() {
+  queryForm.style.display = 'none';
+}
+
+function showUploadVAEs() {
+  uploadVAEs.style.display = 'block';
+}
+
+function hideUploadVAEs() {
+  uploadVAEs.style.display = 'none';
+}
+
+// Check sounds request durations
+function checkDurations() {
+  const submitBtn = document.getElementById("submit-btn");
+  const errorMessage = document.getElementById("error-message");
+  const input_minDuration = parseInt(
+    document.getElementById("query_min_time_input").value
+  );
+  const input_maxDuration = parseInt(
+    document.getElementById("query_max_time_input").value
+  );
+  const mensajeError =
+    "Invalid range for the sounds!";
+
+  if (input_minDuration) {
+    minDuration = input_minDuration;
+  }
+
+  if (input_maxDuration) {
+    maxDuration = input_maxDuration;
+  }
+
+  if (minDuration >= maxDuration) {
+    submitBtn.disabled = true;
+    errorMessage.innerHTML = mensajeError;
+    errorMessage.style.display = "block";
+  } else {
+    submitBtn.disabled = false;
+    errorMessage.style.display = "none";
+  }
+}
+
+// Slide button functions
+function slideButton(expanded){
+  const arrowElements = document.querySelectorAll("#cta .arrow");
+  const nextElements = document.querySelectorAll(".next");
+
+  if (expanded) {
+    if (queryForm.style.display === "block") {
+      hideForm();
+    }
+  
+    if (uploadVAEs.style.display === "block") {
+      hideUploadVAEs();
+    }
+  
+    nextElements.forEach(element => {
+      element.style.transform = "none";
+    });
+    arrowElements.forEach(element => {
+      element.style.left = "30%";
+    });
+    transformationInputs.forEach(element => {
+      element.style.display = "block";
+    });
+  } else {
+    nextElements.forEach(element => {
+      element.style.transform = "";
+    });
+    arrowElements.forEach(element => {
+      element.style.left = "20%";
+    });
+    transformationInputs.forEach(element => {
+      element.style.display = "none";
+    });
+  }
+}
