@@ -16,6 +16,28 @@ const menuHamburguesa = document.getElementById("menuHamburguesa");
 let menuVisible = false;
 // Menú Hamburguesa
 
+// Para el espectrograma
+const heatmapColors = [
+  '#000000', '#250066', '#4B0096', '#7200B6', '#9C00E6',
+  '#C601E6', '#ED01C2', '#FF00A2', '#FF007F', '#FF005A',
+  '#FF0036', '#FF0012', '#FF1100', '#FF2B00', '#FF4600',
+  '#FF6000', '#FF7A00', '#FF9400', '#FFAF00', '#FFC900',
+  '#FFE300', '#FFFD00', '#E8FF00', '#D3FF00', '#BEFF00',
+  '#A9FF00', '#94FF00', '#7FFF00', '#6EFF00', '#5DFF00',
+  '#4CFF00', '#3BFF00', '#2AFF00', '#1AFF00', '#09FF00',
+  '#00FF0A', '#00FF1B', '#00FF2C', '#00FF3D', '#00FF4E',
+  '#00FF5F', '#00FF70', '#00FF81', '#00FF92', '#00FFA3',
+  '#00FFB4', '#00FFC5', '#00FFD6', '#00FFE7', '#00FFF8',
+  '#00E6FF', '#00D2FF', '#00BDFF', '#00A8FF', '#0093FF',
+  '#007EFF', '#0069FF', '#0055FF', '#0040FF', '#002BFF',
+  '#0016FF', '#0000FF'
+];
+let dBData = [];
+let maxValSoundsDB = [];
+const canvasSpec = document.getElementById('spec');
+const ctxSpec = canvasSpec.getContext('2d');
+// Para el espectrograma
+
 // Variational Autoencoder stuff
 let encoderModel = undefined;
 let decoderModel = undefined;
@@ -46,6 +68,7 @@ let n_pages = 3;
 let n_pages_received = 0;
 let all_loaded = false;
 let last_selected_sound_id = undefined;
+let soundsWaveforms = [];
 
 // t-sne and xy map
 let max_tsne_iterations = 500;
@@ -65,6 +88,8 @@ const sidebar = document.getElementById("sidebar");
 const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
+let canvasWave = document.getElementById('waveform-generated');
+let ctxWave = canvasWave.getContext('2d');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let w = window.innerWidth;
@@ -132,6 +157,10 @@ function start() {
     query = default_query;
   }
 
+    dBData = [];
+    maxValSoundsDB = [];
+    soundsWaveforms = [];
+
   let url =
     "https://freesound.org/apiv2/search/text/?query=" +
     query +
@@ -166,16 +195,14 @@ window.addEventListener("load", async function () {
 });
 
 function showUser(userName) {
-  const loginButton = document.getElementById("login");
-  const userContainer = document.getElementById("userContainer");
   const userNameElement = document.getElementById("userName");
-  const logoutButton = document.getElementById("logoutButton");
+  const logout_user_container = document.getElementById("logout-user-container");
+  const login_container = document.getElementById("login-container");
 
-  loginButton.style.display = "none";
+  login_container.style.display = "none";
 
-  userContainer.style.display = "block";
+  logout_user_container.style.display = "block";
   userNameElement.textContent = userName;
-  logoutButton.style.display = "block";
 }
 
 function logout() {
@@ -426,6 +453,7 @@ function load_data_from_fs_json(data) {
     getWaveformFromPreview(function (waveform) {
       let adjustedWaveform = adjustAudioToExpectedSize(waveform, 22050);
       sessionId += 1;
+      soundsWaveforms.push(waveform);
 
       // TODO
       const signal = tf.tensor1d(adjustedWaveform);
@@ -443,6 +471,23 @@ function load_data_from_fs_json(data) {
       let mcltspecTransposed = finalData[0].map((_, colIndex) =>
         finalData.map((row) => row[colIndex])
       );
+      
+      // Para el espectrograma
+      const stftAbs = tf.abs(finalData);
+
+      // Convertir a decibeles (escala logarítmica)
+      const stftDb = tf.tidy(() => {
+        const minAmp = tf.max(stftAbs).div(1e6).clipByValue(1, Infinity);
+        const logSpec = tf.log(stftAbs.add(minAmp));
+        return logSpec.mul(10).div(tf.log(tf.scalar(10)));
+      });
+      
+      // Obtener los valores de amplitud del espectrograma
+      const stftData = stftDb.arraySync();
+      dBData.push(stftData);
+      maxValSoundsDB.push(tf.max(stftData).dataSync()[0]);
+      // Para el espectrograma
+      
       let mclt2Dspec = spectrogram(mcltspecTransposed);
       let { mu_latent_space, log_variance_latent_space } =
         encodeAudio(mclt2Dspec);
@@ -461,12 +506,18 @@ function checkSelectSound(x, y) {
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];
+  let spectro_selected_sound = [];
+  let max_value_spectro = [];
+  let waveform_selected_Sound = [];
   for (i in sounds) {
     let sound = sounds[i];
     let dist = computeEuclideanDistance(sound.x, sound.y, x, y);
     if (dist < min_dist) {
       min_dist = dist;
       selected_sound = sound;
+      spectro_selected_sound = dBData[i];
+      max_value_spectro = maxValSoundsDB[i];
+      waveform_selected_Sound = soundsWaveforms[i];
     }
     distancesArray.push(dist);
   }
@@ -479,7 +530,7 @@ function checkSelectSound(x, y) {
     }
   }
   if (min_dist < 0.02) {
-    selectSound(selected_sound);
+    selectSound(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound);
   } else {
     let dim1LatentSpace = x * (map_xy_x_max - map_xy_x_min) + map_xy_x_min;
     let dim2LatentSpace =
@@ -553,7 +604,7 @@ function checkSelectSound(x, y) {
   }
 }
 
-function selectSound(selected_sound) {
+function selectSound(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
   selected_sound.selected = true;
   selected_sound.mod_amp = 5.0;
   if (MONO_MODE) {
@@ -564,7 +615,7 @@ function selectSound(selected_sound) {
     showGeneratedSoundInfo(selected_sound.waveform);
   } else {
     audio_manager.loadSound(selected_sound.id, selected_sound.preview_url);
-    showSoundInfo(selected_sound);
+    showSoundInfo(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound);
   }
   last_selected_sound_id = selected_sound["id"];
   selected_sound.selected = false;
@@ -591,7 +642,7 @@ function getSoundFromId(sound_id) {
   }
 }
 
-function showSoundInfo(sound) {
+function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
   let html = "";
   if (sound.image !== undefined && sound.image !== "") {
     html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
@@ -603,7 +654,44 @@ function showSoundInfo(sound) {
     '" target="_blank">' +
     sound.username +
     "</a>";
-  document.getElementById("sound_info_box").innerHTML = html;
+    const soundInfoContent = document.getElementById("sound_info_content");
+
+  // Para el espectrograma. Representar el espectrograma en el lienzo (canvas)
+  for (let y = 0; y < spectro_selected_sound.length; y++) {
+    for (let x = 0; x < spectro_selected_sound[y].length; x++) {
+      const colorValue = spectro_selected_sound[y][x];
+      const color = getColorFromValue(colorValue, max_value_spectro);
+      ctxSpec.fillStyle = color;
+      ctxSpec.fillRect(x, y, 1, 1);
+    }
+  }
+// Para el espectrograma
+
+  let audioData = new Float32Array(waveform_selected_Sound);
+  canvasWave.style.display = "block";
+  canvasWave.width = document.getElementById('sound_info_box').offsetWidth;
+  canvasWave.height = 100;
+  document.getElementById('sound_info_box').appendChild(canvasWave);
+  drawWaveform(audioData);
+  soundInfoContent.innerHTML = html;
+}
+
+function drawWaveform(data) {
+  ctxWave.clearRect(0, 0, canvasWave.width, canvasWave.height);
+  ctxWave.strokeStyle = 'yellow';
+  ctxWave.beginPath();
+  ctxWave.moveTo(0, (1 + data[0]) * canvasWave.height / 2);
+  for (let i = 1; i < data.length; i++) {
+    ctxWave.lineTo(i * canvasWave.width / data.length, (1 + data[i]) * canvasWave.height / 2);
+  }
+  ctxWave.stroke();
+}
+
+// Para el espectrograma
+function getColorFromValue(value, maxValue) {
+  const normalizedValue = value / maxValue;
+  const colorIndex = Math.floor(normalizedValue * (heatmapColors.length - 1));
+  return heatmapColors[colorIndex];
 }
 
 function showGeneratedSoundInfo(waveform) {

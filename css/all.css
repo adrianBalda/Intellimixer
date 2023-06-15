@@ -25,10 +25,66 @@ canvas {
   color: #fff;
 }
 
-#login {
-  border-radius: 5px;
-  height: 30px;
-  margin-bottom: 10px;
+#loginButton {
+	border: 2px solid white;
+	border-radius: 0.7vw;
+	background-color: transparent;
+	color: white;
+	width: 3.7vw;
+	height: 1.6vw;
+}
+
+#sound_info_content {
+	flex-basis: 50%;
+}
+
+#waveform-content {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#waveform-generated {
+	position: absolute;
+	top: -5vw;
+	background: black;
+	border-radius: 0.7vw;
+	display: none;
+}
+
+.spectrogram {
+	top: 60%
+}
+
+.waveform-style {
+	width: 15vw;
+    height: 4.5vw;
+}
+
+#menu-user-container {
+	display: flex;
+	height: 2.5vw;
+}
+
+#user-column {
+	flex-basis: 50%;
+}
+
+#logout-column {
+	flex-basis: 20%;
+}
+
+#menu-column {
+	flex-basis: 30%;
+}
+
+#logoutButton {
+	border: 2px solid white;
+	border-radius: 0.7vw;
+	background-color: transparent;
+	color: white;
+	width: 110%;
+	height: 1.6vw;
 }
 
 #query_box {
@@ -120,9 +176,12 @@ canvas {
 }
 
 #sound_info_box {
-  left: 20px;
-  bottom: 20px;
-  text-align: left;
+	left: 1vw;
+	flex-wrap: wrap; 
+    bottom: 0.2vw;
+    text-align: left;
+    width: 36vw;
+	display: flex;
 }
 
 #logo_box {
