@@ -34,8 +34,8 @@ const heatmapColors = [
 ];
 let dBData = [];
 let maxValSoundsDB = [];
-const canvasSpec = document.getElementById('spec');
-const ctxSpec = canvasSpec.getContext('2d');
+const canvasSpectrogram = document.getElementById('spectro');
+const ctxSpectrogram = canvasSpectrogram.getContext('2d');
 // Para el espectrograma
 
 // Variational Autoencoder stuff
@@ -84,12 +84,14 @@ let map_xy_y_min = undefined;
 
 // Canvas and display stuff
 const arrowButton = document.querySelector(".round");
+const soundInfoBox = document.getElementById('sound_info_box');
+const switchButton = document.getElementById("switch-images-button");
 const sidebar = document.getElementById("sidebar");
 const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
-let canvasWave = document.getElementById('waveform-generated');
-let ctxWave = canvasWave.getContext('2d');
+let canvasWaveform = document.getElementById('waveform-generated');
+let ctxWaveform = canvasWaveform.getContext('2d');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let w = window.innerWidth;
@@ -446,7 +448,8 @@ function load_data_from_fs_json(data) {
       (url = sound_json["url"]),
       (name = sound_json["name"]),
       (username = sound_json["username"]),
-      (image = sound_json["image"] || sound_json["images"]["spectral_m"])
+      // (image = sound_json["image"] || sound_json["images"]["spectral_m"])
+      (image = [sound_json["images"]["spectral_m"], sound_json["images"]["waveform_m"]])
     );
     sounds.push(sound);
 
@@ -473,9 +476,9 @@ function load_data_from_fs_json(data) {
       );
       
       // Para el espectrograma
-      const stftAbs = tf.abs(finalData);
+      const stftAbs = tf.abs(mcltspecTransposed);
 
-      // Convertir a decibeles (escala logarítmica)
+      // Convertir a decibelios (escala logarítmica)
       const stftDb = tf.tidy(() => {
         const minAmp = tf.max(stftAbs).div(1e6).clipByValue(1, Infinity);
         const logSpec = tf.log(stftAbs.add(minAmp));
@@ -643,10 +646,11 @@ function getSoundFromId(sound_id) {
 }
 
 function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
+  switchButton.innerHTML = '<img style="width: 30px" src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/48/000000/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
+  switchButton.style.display = "block"
+  canvasSpectrogram.style.display = "none"
+
   let html = "";
-  if (sound.image !== undefined && sound.image !== "") {
-    html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
-  }
   html +=
     sound.name +
     ' by <a href="' +
@@ -661,30 +665,40 @@ function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, wavefor
     for (let x = 0; x < spectro_selected_sound[y].length; x++) {
       const colorValue = spectro_selected_sound[y][x];
       const color = getColorFromValue(colorValue, max_value_spectro);
-      ctxSpec.fillStyle = color;
-      ctxSpec.fillRect(x, y, 1, 1);
+      ctxSpectrogram.fillStyle = color;
+      ctxSpectrogram.fillRect(x, y, 1, 1);
     }
   }
 // Para el espectrograma
-
   let audioData = new Float32Array(waveform_selected_Sound);
-  canvasWave.style.display = "block";
-  canvasWave.width = document.getElementById('sound_info_box').offsetWidth;
-  canvasWave.height = 100;
-  document.getElementById('sound_info_box').appendChild(canvasWave);
+  canvasWaveform.style.display = "block";
+  canvasWaveform.width = soundInfoBox.offsetWidth;
+  canvasWaveform.height = 100;
+  soundInfoBox.appendChild(canvasWaveform);
   drawWaveform(audioData);
   soundInfoContent.innerHTML = html;
 }
 
-function drawWaveform(data) {
-  ctxWave.clearRect(0, 0, canvasWave.width, canvasWave.height);
-  ctxWave.strokeStyle = 'yellow';
-  ctxWave.beginPath();
-  ctxWave.moveTo(0, (1 + data[0]) * canvasWave.height / 2);
-  for (let i = 1; i < data.length; i++) {
-    ctxWave.lineTo(i * canvasWave.width / data.length, (1 + data[i]) * canvasWave.height / 2);
+switchButton.addEventListener("click", function() {
+  canvasWaveform.style.display = (canvasWaveform.style.display === "none") ? "block" : "none";
+  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === "none") ? "block" : "none";
+
+  if (canvasWaveform.style.display === "none") {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/ios-glyphs/30/000000/bar-chart.png" alt="bar-chart"/>';
+  } else {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
   }
-  ctxWave.stroke();
+});
+
+function drawWaveform(data) {
+  ctxWaveform.clearRect(0, 0, canvasWaveform.width, canvasWaveform.height);
+  ctxWaveform.strokeStyle = 'yellow';
+  ctxWaveform.beginPath();
+  ctxWaveform.moveTo(0, (1 + data[0]) * canvasWaveform.height / 2);
+  for (let i = 1; i < data.length; i++) {
+    ctxWaveform.lineTo(i * canvasWaveform.width / data.length, (1 + data[i]) * canvasWaveform.height / 2);
+  }
+  ctxWaveform.stroke();
 }
 
 // Para el espectrograma
