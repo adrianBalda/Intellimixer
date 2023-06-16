@@ -34,8 +34,25 @@ canvas {
 	height: 1.6vw;
 }
 
+#loginButton:hover {
+  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
+  border: 3px solid #00d7c3;
+}
+
 #sound_info_content {
 	flex-basis: 50%;
+}
+
+.switch-button {
+  display: none;
+  background-color: yellow;
+  border-radius: 50%;
+}
+
+.switch-button:hover,
+.switch-button:focus {
+  box-shadow: 0 0 10px rgb(255, 166, 0);
+    transform: translateY(-0.25em);
 }
 
 #waveform-content {
@@ -53,7 +70,10 @@ canvas {
 }
 
 .spectrogram {
-	top: 60%
+    top: -19vw;
+    left: 10%;
+    width: 120%;
+    transform: scaleY(-1);
 }
 
 .waveform-style {
@@ -89,6 +109,11 @@ canvas {
 	color: white;
 	width: 110%;
 	height: 1.6vw;
+}
+
+#logoutButton:hover {
+  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
+  border: 3px solid #00d7c3;
 }
 
 #query_box {
@@ -182,9 +207,9 @@ canvas {
 #sound_info_box {
 	left: 1vw;
 	flex-wrap: wrap; 
-    bottom: 0.2vw;
-    text-align: left;
-    width: 36vw;
+  bottom: 0.2vw;
+  text-align: left;
+  width: 30vw;
 	display: flex;
 }
 
@@ -434,7 +459,6 @@ br {
 .round {
   position: relative;
   right: 15%;
-  top: 2vw;
   border: 2px solid #fff;
   width: 3vw;
   height: 3vw;
