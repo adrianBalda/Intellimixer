@@ -45,7 +45,7 @@ canvas {
 
 .switch-button {
   display: none;
-  background-color: yellow;
+  border: 2px solid white;
   border-radius: 50%;
 }
 
@@ -415,16 +415,41 @@ br {
 
 .transformation-tittle {
 	top: 3%;
-    text-align: center;
-    position: relative;
-    font-size: 120%;
+  text-align: center;
+  position: relative;
+  font-size: 120%;
+}
+
+#play-sound-button {
+  position: relative;
+  left: -15%;
+  top: 3vw;
+  height: 20%;
+}
+
+.play-icon{
+  border-radius: 50%;
+}
+
+.play-icon:hover {
+  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
+}
+
+.canvasProgress {
+  top: 10%;
+  /* display: block; */
+}
+
+.waveform-progress {
+  top: 10%
 }
 
 .inputs-containers {
 	width: 75%;
 	float: right;
 	position: relative;
-	top: 45%;
+	top: 35%;
+  display: flex;
 }
 
 .transform-inputs {
