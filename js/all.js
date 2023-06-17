@@ -32,6 +32,34 @@ const heatmapColors = [
   '#007EFF', '#0069FF', '#0055FF', '#0040FF', '#002BFF',
   '#0016FF', '#0000FF'
 ];
+
+// const librosaColors = [
+//   '#000004', '#010005', '#010106', '#010108', '#01020A', '#01020C', '#02030E', '#020310', '#020411', '#030413',
+//   '#040415', '#040518', '#05061A', '#05061C', '#06071E', '#070720', '#080822', '#090924', '#0A0A26', '#0B0B28',
+//   '#0C0C2A', '#0D0D2C', '#0E0E2E', '#0F0F30', '#101032', '#111134', '#121236', '#141238', '#15133A', '#16143C',
+//   '#17153E', '#191641', '#1A1743', '#1C1845', '#1D1947', '#1E1A49', '#201B4B', '#221C4D', '#231E4F', '#251F51',
+//   '#271F53', '#292055', '#2A2157', '#2C2259', '#2E235B', '#30245D', '#32255F', '#342761', '#362963', '#382A65',
+//   '#3A2B67', '#3C2C69', '#3E2D6B', '#402F6D', '#42306F', '#443171', '#463273', '#483375', '#4A3477', '#4C3579',
+//   '#4E367B', '#50387D', '#52397F', '#553A81', '#573B83', '#593D85', '#5B3E87', '#5D3F89', '#60418B', '#62428D',
+//   '#64438F', '#664491', '#684593', '#6A4695', '#6C4797', '#6E4899', '#70499B', '#734B9C', '#754C9E', '#774D9F',
+//   '#794EA1', '#7B4FA3', '#7D50A4', '#7F51A6', '#8252A7', '#8453A9', '#8654AA', '#8855AC', '#8A56AD', '#8C57AF',
+//   '#8E58B0', '#9059B1', '#925AB3', '#955BB4', '#975CB5', '#995DB7', '#9B5EB8', '#9D5FB9', '#9F60BA', '#A161BC',
+//   '#A362BD', '#A563BE', '#A764BF', '#A965C0', '#AB66C1', '#AD67C2', '#AF68C3', '#B169C4', '#B36AC5', '#B56BC6',
+//   '#B76CC7', '#B96DC8', '#BB6EC9', '#BD6FCA', '#BF70CA', '#C171CB', '#C372CC', '#C573CD', '#C774CE', '#C975CF',
+//   '#CB76D0', '#CD77D0', '#CF78D1', '#D179D2', '#D37AD3', '#D57BD4', '#D67CD5', '#D87DD5', '#DA7ED6', '#DC7FD7',
+//   '#DE80D7', '#E081D8', '#E282D9', '#E483DA', '#E584DA', '#E785DB', '#E986DC', '#EB87DC', '#EC88DD', '#EE89DE',
+//   '#F08ADE', '#F18BDF', '#F38CE0', '#F48DE0', '#F68EE1', '#F78FE2', '#F991E2', '#FA92E3', '#FC93E3', '#FD94E4',
+//   '#FE95E5', '#FF96E5', '#FF97E6', '#FF98E7', '#FF99E7', '#FF9BE8', '#FF9CE8', '#FF9DE9', '#FF9EE9', '#FF9FEA',
+//   '#FFA0EA', '#FFA2EB', '#FFA3EB', '#FFA4EC', '#FFA5EC', '#FFA6ED', '#FFA7ED', '#FFA8EE', '#FFAAEE', '#FFABEF',
+//   '#FFACEF', '#FFADEF', '#FFAEF0', '#FFAFF0', '#FFB0F0', '#FFB2F1', '#FFB3F1', '#FFB4F2', '#FFB5F2', '#FFB6F2',
+//   '#FFB8F3', '#FFB9F3', '#FFBAF3', '#FFBBF4', '#FFBCF4', '#FFBEF4', '#FFBFF5', '#FFC0F5', '#FFC1F5', '#FFC3F5',
+//   '#FFC4F6', '#FFC5F6', '#FFC6F6', '#FFC8F6', '#FFC9F7', '#FFCAF7', '#FFCBF7', '#FFCDF7', '#FFCEF8', '#FFCFF8',
+//   '#FFD0F8', '#FFD1F8', '#FFD3F9', '#FFD4F9', '#FFD5F9', '#FFD7F9', '#FFD8FA', '#FFD9FA', '#FFDAFA', '#FFDCFA',
+//   '#FFDDFA', '#FFDEFB', '#FFDFFB', '#FFE1FB', '#FFE2FB', '#FFE3FB', '#FFE5FB', '#FFE6FB', '#FFE7FB', '#FFE8FB',
+//   '#FFEAFB', '#FFEBFB', '#FFECFC', '#FFEDFC', '#FFEEFC', '#FFF0FC', '#FFF1FC', '#FFF2FC', '#FFF4FC', '#FFF5FC',
+//   '#FFF6FC', '#FFF7FC', '#FFF9FC', '#FFFAFD', '#FFFBFD', '#FFFCFD', '#FFFEFD', '#FFFFFD'
+// ];
+
 let dBData = [];
 let maxValSoundsDB = [];
 const canvasSpectrogram = document.getElementById('spectro');
@@ -61,6 +89,7 @@ let default_query = "footstep";
 let minDuration = 1;
 let maxDuration = 2;
 let sounds = [];
+let currentSound = [];
 let sampledSounds = [];
 let extra_descriptors = undefined;
 let map_features = undefined;
@@ -83,6 +112,8 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const playSoundButton = document.getElementById("play-sound-button");
+const transformInputs = document.querySelectorAll('.transform-inputs');
 const arrowButton = document.querySelector(".round");
 const soundInfoBox = document.getElementById('sound_info_box');
 const switchButton = document.getElementById("switch-images-button");
@@ -91,9 +122,14 @@ const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
 let canvasWaveform = document.getElementById('waveform-generated');
+let progressContainer = document.getElementById('progressContainer');
+let canvasProgress = document.getElementById('canvasProgress');
+let ctxProgress = canvasProgress.getContext('2d');
 let ctxWaveform = canvasWaveform.getContext('2d');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
+canvasProgress.width = progressContainer.offsetWidth;
+canvasProgress.height = 100;
 let w = window.innerWidth;
 let h = window.innerHeight;
 let default_point_modulation = 0.6;
@@ -187,6 +223,26 @@ function start() {
     accessToken?.access_token
   );
 }
+
+transformInputs.forEach((input, index) => {
+  const inputListener = () => {
+    const value = parseFloat(input.value);
+    applyEffects(index, value);
+  };
+
+  input.addEventListener('input', inputListener);
+});
+
+switchButton.addEventListener("click", function() {
+  canvasWaveform.style.display = (canvasWaveform.style.display === "none") ? "block" : "none";
+  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === "none") ? "block" : "none";
+
+  if (canvasWaveform.style.display === "none") {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/external-smashingstocks-glyph-smashing-stocks/30/FFFFFF/external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks.png" alt="external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks"/>';
+  } else {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
+  }
+});
 
 window.addEventListener("load", async function () {
   AUTHORIZATION_CODE = getCodeFromURL();
@@ -461,7 +517,7 @@ function load_data_from_fs_json(data) {
       // TODO
       const signal = tf.tensor1d(adjustedWaveform);
       const frameLength = 512;
-      const frameStep = 248; // Para conseguir 64x256
+      const frameStep = Math.floor(frameLength / 4); // Si no, con 248 se obtiene 64x256
       const fftLength = 256;
       const signalTransformed = tf.signal
         .stft(signal, frameLength, frameStep, fftLength)
@@ -471,6 +527,16 @@ function load_data_from_fs_json(data) {
         const data = element.slice(0, 256);
         finalData.push(data);
       });
+      
+      if (finalData.length > 64) {
+        finalData.splice(64);
+      } else if (finalData.length < 64) {
+        const numRowsToAdd = 64 - finalData.length;
+        const lastRow = finalData[finalData.length - 1];
+        for (let i = 0; i < numRowsToAdd; i++) {
+          finalData.push(lastRow);
+        }
+      }
       let mcltspecTransposed = finalData[0].map((_, colIndex) =>
         finalData.map((row) => row[colIndex])
       );
@@ -484,7 +550,7 @@ function load_data_from_fs_json(data) {
         const logSpec = tf.log(stftAbs.add(minAmp));
         return logSpec.mul(10).div(tf.log(tf.scalar(10)));
       });
-      
+                  
       // Obtener los valores de amplitud del espectrograma
       const stftData = stftDb.arraySync();
       dBData.push(stftData);
@@ -512,6 +578,7 @@ function checkSelectSound(x, y) {
   let spectro_selected_sound = [];
   let max_value_spectro = [];
   let waveform_selected_Sound = [];
+  currentSound = [];
   for (i in sounds) {
     let sound = sounds[i];
     let dist = computeEuclideanDistance(sound.x, sound.y, x, y);
@@ -521,6 +588,7 @@ function checkSelectSound(x, y) {
       spectro_selected_sound = dBData[i];
       max_value_spectro = maxValSoundsDB[i];
       waveform_selected_Sound = soundsWaveforms[i];
+      currentSound = soundsWaveforms[i];
     }
     distancesArray.push(dist);
   }
@@ -646,7 +714,7 @@ function getSoundFromId(sound_id) {
 }
 
 function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
-  switchButton.innerHTML = '<img style="width: 30px" src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/48/000000/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
+  switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
   switchButton.style.display = "block"
   canvasSpectrogram.style.display = "none"
 
@@ -675,30 +743,43 @@ function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, wavefor
   canvasWaveform.width = soundInfoBox.offsetWidth;
   canvasWaveform.height = 100;
   soundInfoBox.appendChild(canvasWaveform);
-  drawWaveform(audioData);
+  drawWaveform(audioData, canvasWaveform, ctxWaveform);
   soundInfoContent.innerHTML = html;
+
+  //Para la transformacion
+  canvasProgress.width = progressContainer.offsetWidth;
+  canvasProgress.height = 100;
+  drawWaveform(audioData, canvasProgress, ctxProgress);
 }
 
-switchButton.addEventListener("click", function() {
-  canvasWaveform.style.display = (canvasWaveform.style.display === "none") ? "block" : "none";
-  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === "none") ? "block" : "none";
-
-  if (canvasWaveform.style.display === "none") {
-    switchButton.innerHTML = '<img src="https://img.icons8.com/ios-glyphs/30/000000/bar-chart.png" alt="bar-chart"/>';
-  } else {
-    switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
-  }
-});
-
-function drawWaveform(data) {
-  ctxWaveform.clearRect(0, 0, canvasWaveform.width, canvasWaveform.height);
-  ctxWaveform.strokeStyle = 'yellow';
-  ctxWaveform.beginPath();
-  ctxWaveform.moveTo(0, (1 + data[0]) * canvasWaveform.height / 2);
+function drawWaveform(data, waveCanvas, waveCtx) {
+  waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+  waveCtx.strokeStyle = 'yellow';
+  waveCtx.beginPath();
+  waveCtx.moveTo(0, (1 + data[0]) * waveCanvas.height / 2);
   for (let i = 1; i < data.length; i++) {
-    ctxWaveform.lineTo(i * canvasWaveform.width / data.length, (1 + data[i]) * canvasWaveform.height / 2);
+    waveCtx.lineTo(i * waveCanvas.width / data.length, (1 + data[i]) * waveCanvas.height / 2);
   }
-  ctxWaveform.stroke();
+  waveCtx.stroke();
+}
+
+function updateProgress(progress) {
+  const progressColor = 'orange';
+
+  drawWaveform(currentSound, canvasProgress, ctxProgress)
+
+  // Pintar progreso en color naranja
+  ctxProgress.strokeStyle = progressColor;
+  ctxProgress.beginPath();
+  ctxProgress.moveTo(0, (1 + currentSound[0]) * canvasProgress.height / 2);
+
+  const progressIndex = Math.floor(progress * currentSound.length);
+  for (let i = 1; i <= progressIndex; i++) {
+    const x = i * canvasProgress.width / currentSound.length;
+    const y = (1 + currentSound[i]) * canvasProgress.height / 2;
+    ctxProgress.lineTo(x, y);
+  }
+  ctxProgress.stroke();
 }
 
 // Para el espectrograma
