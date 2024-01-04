@@ -226,7 +226,7 @@ function freesoundLogin() {
   logInfo("Login to Freesound!");
   const scope = "read";
   let auth_url =
-    "https://freesound.org/apiv2/oauth2/authorize/?client_id=" +
+    "https://freesound.org/apiv2/oauth2/logout_and_authorize/?client_id=" +
     CLIENT_ID +
     "&response_type=code&redirect_uri=" +
     encodeURIComponent(REDIRECT_URL) +
