@@ -1,5 +1,21 @@
 /* Global variables and objects */
 
+// Login data
+const CLIENT_ID = "J3QbU7A9Mt9wQbqYMRo9";
+const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
+const REDIRECT_URL = "https://adrianbalda.github.io/Intellimixer/";
+let AUTHORIZATION_CODE;
+let accessToken;
+const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+
+//Menú Hamburguesa
+const menuButton = document.querySelector(".menu-button");
+const menuOptions = document.querySelector(".menu-options");
+const menuContainer = document.querySelector(".menu-container");
+const menuHamburguesa = document.getElementById("menuHamburguesa");
+let menuVisible = false;
+// Menú Hamburguesa
+
 // Variational Autoencoder stuff
 let encoderModel = undefined;
 let decoderModel = undefined;
@@ -30,6 +46,7 @@ let n_pages = 3;
 let n_pages_received = 0;
 let all_loaded = false;
 let last_selected_sound_id = undefined;
+let soundsWaveforms = [];
 
 // t-sne and xy map
 let max_tsne_iterations = 500;
@@ -44,6 +61,13 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const arrowButton = document.querySelector(".round");
+const sidebar = document.getElementById("sidebar");
+const transformationInputs = document.querySelector(".transform-inputs");
+const queryForm = document.getElementById("query-form");
+const uploadVAEs = document.getElementById('upload-vaes-div');
+let canvasWave = document.getElementById('waveform-generated');
+let ctxWave = canvasWave.getContext('2d');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let w = window.innerWidth;
@@ -111,6 +135,8 @@ function start() {
     query = default_query;
   }
 
+    soundsWaveforms = [];
+
   let url =
     "https://freesound.org/apiv2/search/text/?query=" +
     query +
@@ -122,41 +148,102 @@ function start() {
     "]&page_size=" +
     numFiles +
     "&fields=id,previews,name,analysis,url,username,images" +
-    "&token=I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e&page=2";
+    "&token=" +
+    DEFAULT_TOKEN +
+    "&page=2";
 
-  loadJSON(function (data) {
-    load_data_from_fs_json(data);
-  }, url);
+  console.log(url);
+  loadJSON(
+    function (data) {
+      load_data_from_fs_json(data);
+    },
+    url,
+    accessToken?.access_token
+  );
 }
 
-function checkDurations() {
-  const submitBtn = document.getElementById("submit-btn");
-  const errorMessage = document.getElementById("error-message");
-  const input_minDuration = parseInt(
-    document.getElementById("query_min_time_input").value
-  );
-  const input_maxDuration = parseInt(
-    document.getElementById("query_max_time_input").value
-  );
-  const mensajeError = "Invalid range for the sounds: Minimum range must be lower than maximum range!";
+window.addEventListener("load", async function () {
+  AUTHORIZATION_CODE = getCodeFromURL();
+  accessToken = await getAccessToken();
+  getUserInfo(accessToken.access_token, function (userName) {
+    showUser(userName);
+  });
+});
 
-  if (input_minDuration) {
-    minDuration = input_minDuration;
-  }
+function showUser(userName) {
+  const userNameElement = document.getElementById("userName");
+  const logout_user_container = document.getElementById("logout-user-container");
+  const login_container = document.getElementById("login-container");
 
-  if (input_maxDuration) {
-    maxDuration = input_maxDuration;
-  }
+  login_container.style.display = "none";
 
-  if (minDuration >= maxDuration) {
-    submitBtn.disabled = true;
-    errorMessage.innerHTML = mensajeError;
-    errorMessage.style.display = "block";
+  logout_user_container.style.display = "block";
+  userNameElement.textContent = userName;
+}
+
+function logout() {
+  // accessToken = undefined;
+  // AUTHORIZATION_CODE = undefined;
+  // logoutFreesound();
+  const loginButton = document.getElementById("login");
+  const userContainer = document.getElementById("userContainer");
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
+
+  loginButton.style.display = "block";
+  userContainer.style.display = "none";
+  userNameElement.textContent = "";
+  logoutButton.style.display = "none";
+}
+
+arrowButton.addEventListener("click", function() {
+  sidebar.classList.toggle("expanded");
+  arrowButton.classList.toggle("expanded");
+
+  const expanded = sidebar.classList.contains("expanded");
+  slideButton(expanded)
+});
+
+let formSubmitHandler = function formSubmitHandler(event) {
+  event.preventDefault();
+  start();
+  hideForm();
+  hideUploadVAEs()
+};
+queryForm.onsubmit = formSubmitHandler;
+
+menuButton.addEventListener("click", function (event) {
+  event.stopPropagation();
+  if (menuVisible) {
+    hideMenu();
   } else {
-    submitBtn.disabled = false;
-    errorMessage.style.display = "none";
+    showMenu();
   }
-}
+});
+
+menuContainer.addEventListener("click", function (event) {
+  event.stopPropagation();
+});
+
+document.addEventListener("click", function () {
+  if (menuVisible) {
+    hideMenu();
+  }
+});
+
+document.getElementById('new-sound').addEventListener('click', function(event) {
+  event.preventDefault();
+  showForm();
+  hideMenu();
+});
+
+document.getElementById('submit-btn').addEventListener('click', formSubmitHandler);
+
+document.getElementById('upload-vaes').addEventListener('click', function(event) {
+  event.preventDefault();
+  showUploadVAEs();
+  hideMenu();
+});
 
 function changeAxisAttribute() {
   all_loaded = false;
@@ -342,6 +429,7 @@ function load_data_from_fs_json(data) {
     getWaveformFromPreview(function (waveform) {
       let adjustedWaveform = adjustAudioToExpectedSize(waveform, 22050);
       sessionId += 1;
+      soundsWaveforms.push(waveform);
 
       // TODO
       const signal = tf.tensor1d(adjustedWaveform);
@@ -359,6 +447,7 @@ function load_data_from_fs_json(data) {
       let mcltspecTransposed = finalData[0].map((_, colIndex) =>
         finalData.map((row) => row[colIndex])
       );
+      
       let mclt2Dspec = spectrogram(mcltspecTransposed);
       let { mu_latent_space, log_variance_latent_space } =
         encodeAudio(mclt2Dspec);
@@ -377,12 +466,14 @@ function checkSelectSound(x, y) {
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];
+  let waveform_selected_Sound = [];
   for (i in sounds) {
     let sound = sounds[i];
     let dist = computeEuclideanDistance(sound.x, sound.y, x, y);
     if (dist < min_dist) {
       min_dist = dist;
       selected_sound = sound;
+      waveform_selected_Sound = soundsWaveforms[i];
     }
     distancesArray.push(dist);
   }
@@ -395,7 +486,7 @@ function checkSelectSound(x, y) {
     }
   }
   if (min_dist < 0.02) {
-    selectSound(selected_sound);
+    selectSound(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound);
   } else {
     let dim1LatentSpace = x * (map_xy_x_max - map_xy_x_min) + map_xy_x_min;
     let dim2LatentSpace =
@@ -469,7 +560,7 @@ function checkSelectSound(x, y) {
   }
 }
 
-function selectSound(selected_sound) {
+function selectSound(selected_sound, waveform_selected_Sound) {
   selected_sound.selected = true;
   selected_sound.mod_amp = 5.0;
   if (MONO_MODE) {
@@ -480,7 +571,7 @@ function selectSound(selected_sound) {
     showGeneratedSoundInfo(selected_sound.waveform);
   } else {
     audio_manager.loadSound(selected_sound.id, selected_sound.preview_url);
-    showSoundInfo(selected_sound);
+    showSoundInfo(selected_sound, waveform_selected_Sound);
   }
   last_selected_sound_id = selected_sound["id"];
   selected_sound.selected = false;
@@ -507,12 +598,9 @@ function getSoundFromId(sound_id) {
   }
 }
 
-function showSoundInfo(sound) {
+function showSoundInfo(sound, waveform_selected_Sound) {
   let html = "";
-  if (
-    sound.image !== undefined &&
-    sound.image !== ""
-  ) {
+  if (sound.image !== undefined && sound.image !== "") {
     html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
   }
   html +=
@@ -522,7 +610,26 @@ function showSoundInfo(sound) {
     '" target="_blank">' +
     sound.username +
     "</a>";
-  document.getElementById("sound_info_box").innerHTML = html;
+    const soundInfoContent = document.getElementById("sound_info_content");
+
+  let audioData = new Float32Array(waveform_selected_Sound);
+  canvasWave.style.display = "block";
+  canvasWave.width = document.getElementById('sound_info_box').offsetWidth;
+  canvasWave.height = 100;
+  document.getElementById('sound_info_box').appendChild(canvasWave);
+  drawWaveform(audioData);
+  soundInfoContent.innerHTML = html;
+}
+
+function drawWaveform(data) {
+  ctxWave.clearRect(0, 0, canvasWave.width, canvasWave.height);
+  ctxWave.strokeStyle = 'yellow';
+  ctxWave.beginPath();
+  ctxWave.moveTo(0, (1 + data[0]) * canvasWave.height / 2);
+  for (let i = 1; i < data.length; i++) {
+    ctxWave.lineTo(i * canvasWave.width / data.length, (1 + data[i]) * canvasWave.height / 2);
+  }
+  ctxWave.stroke();
 }
 
 function showGeneratedSoundInfo(waveform) {

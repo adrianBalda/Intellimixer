@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Timbral Searching</title>
+    <title>Intellimixer</title>
     <link rel="stylesheet" type="text/css" href="css/all.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,500' rel='stylesheet' type='text/css'>
 </head>
@@ -9,7 +9,36 @@
     <canvas></canvas>
 
     <div id="query_box" class="box">
-        <form id="query-form" class="query-form">
+        <div id="menu-user-container">
+            <div id="login-container">
+                <button onclick="freesoundLogin()" id="loginButton">Login</button>
+            </div>
+            <div id="logout-user-container" style="display: none;">
+                <div id="user-column">
+                  <div id="userContainer">
+                    Bienvenido, <span id="userName"></span>
+                  </div>
+                </div>
+                <div id="logout-column">
+                    <button id="logoutButton" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <div id="menu-column">
+              <div class="menu-container">
+                <div class="menu-button">
+                  <span class="menu-bar"></span>
+                  <span class="menu-bar"></span>
+                  <span class="menu-bar"></span>
+                </div>
+                <ul id="menuHamburguesa" class="menu-options">
+                  <li id="new-sound"><a href="#">New Sound</a></li>
+                  <li id="upload-vaes"><a href="#">Upload VAE´s</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+        <form id="query-form" class="query-form" style="display: none;">
             <form>
                 <input id="query_terms_input" type="text" placeholder="Footstep">
                 <p><br>Select minimum sounds duration (in seconds)</p>
@@ -24,14 +53,8 @@
                 <p id="error-message" class="error"></p>
             </form>
 
-            <p><br>Select x-axis attribute</p>
-            <select id="x_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
-            </select>
-            <p><br>Select y-axis attribute</p>
-            <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
-            </select>
         </form>
-        <div>
+        <div id="upload-vaes-div" style="display: none;">
             <br><br>
             <input type="file" id="upload-encoder-json" class="hidden" />
             <label for="upload-encoder-json">Select encoder json file</label>
@@ -48,27 +71,55 @@
             <button onclick="getUserUploadedModel()">Confirm</button>
         </div>
         <br>
-        <div id="info_placeholder"></div>
+        <div class="axis">
+            <p><br>Select x-axis attribute</p>
+            <select id="x_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
+            </select>
+            <p><br>Select y-axis attribute</p>
+            <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
+            </select>
+        </div>
+        <div class="center-con">
+            <div class="round">
+                <div id="cta">
+                    <span class="arrow first next "></span>
+                    <span class="arrow second next "></span>
+                </div>
+            </div>
+            <div id="sidebar">
+                    <p class="transformation-tittle">Sounds Transformations</p>
+                    <div class="inputs-containers">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                        <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
+                    </div>
+            </div>
+        </div>        
+        <div id="info_placeholder">
+            <div class="scroll-info-placeholder"></div>
+        </div>
         <div id="waveform" style="display: none !important;"></div>
     </div>
     <hr>
-
+    
     <div id="instructions_box" class="box">
         Click on points to listen to sounds<br>
         Click on the area to listen to generate new sounds<br>
         Click + drag to navigate the map<br>
         Scroll wheel to zoom<br>
-    </div>
+    </div>  
 
     <div id="x_axis_box" class="box">
-
     </div>
 
     <div id="y_axis_box" class="box">
-
     </div>
 
     <div id="sound_info_box" class="box">
+        <canvas id="waveform-generated" class="waveform-style"></canvas>
+        <div id="sound_info_content"></div>
     </div>
 
     <div id="logo_box" class="box">
@@ -84,7 +135,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"
         integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <!-- <script src="https://unpkg.com/wavesurfer.js@alpha/dist/wavesurfer.min.js"></script>     -->
+    <script src="https://unpkg.com/wavesurfer.js@6.6.3/dist/wavesurfer.js"></script>
     <script src="https://unpkg.com/multilateration"></script>
     <script type="text/javascript" src="dist/async.min.js"></script>
     <script type="text/javascript" src="dist/mclt.js"></script>
