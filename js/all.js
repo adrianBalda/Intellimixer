@@ -6,7 +6,8 @@ const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const REDIRECT_URL = "https://adrianbalda.github.io/Intellimixer/";
 let AUTHORIZATION_CODE;
 let accessToken;
-const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+// const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+let loginRedirected = false;
 
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
@@ -32,33 +33,6 @@ const heatmapColors = [
   '#007EFF', '#0069FF', '#0055FF', '#0040FF', '#002BFF',
   '#0016FF', '#0000FF'
 ];
-
-// const librosaColors = [
-//   '#000004', '#010005', '#010106', '#010108', '#01020A', '#01020C', '#02030E', '#020310', '#020411', '#030413',
-//   '#040415', '#040518', '#05061A', '#05061C', '#06071E', '#070720', '#080822', '#090924', '#0A0A26', '#0B0B28',
-//   '#0C0C2A', '#0D0D2C', '#0E0E2E', '#0F0F30', '#101032', '#111134', '#121236', '#141238', '#15133A', '#16143C',
-//   '#17153E', '#191641', '#1A1743', '#1C1845', '#1D1947', '#1E1A49', '#201B4B', '#221C4D', '#231E4F', '#251F51',
-//   '#271F53', '#292055', '#2A2157', '#2C2259', '#2E235B', '#30245D', '#32255F', '#342761', '#362963', '#382A65',
-//   '#3A2B67', '#3C2C69', '#3E2D6B', '#402F6D', '#42306F', '#443171', '#463273', '#483375', '#4A3477', '#4C3579',
-//   '#4E367B', '#50387D', '#52397F', '#553A81', '#573B83', '#593D85', '#5B3E87', '#5D3F89', '#60418B', '#62428D',
-//   '#64438F', '#664491', '#684593', '#6A4695', '#6C4797', '#6E4899', '#70499B', '#734B9C', '#754C9E', '#774D9F',
-//   '#794EA1', '#7B4FA3', '#7D50A4', '#7F51A6', '#8252A7', '#8453A9', '#8654AA', '#8855AC', '#8A56AD', '#8C57AF',
-//   '#8E58B0', '#9059B1', '#925AB3', '#955BB4', '#975CB5', '#995DB7', '#9B5EB8', '#9D5FB9', '#9F60BA', '#A161BC',
-//   '#A362BD', '#A563BE', '#A764BF', '#A965C0', '#AB66C1', '#AD67C2', '#AF68C3', '#B169C4', '#B36AC5', '#B56BC6',
-//   '#B76CC7', '#B96DC8', '#BB6EC9', '#BD6FCA', '#BF70CA', '#C171CB', '#C372CC', '#C573CD', '#C774CE', '#C975CF',
-//   '#CB76D0', '#CD77D0', '#CF78D1', '#D179D2', '#D37AD3', '#D57BD4', '#D67CD5', '#D87DD5', '#DA7ED6', '#DC7FD7',
-//   '#DE80D7', '#E081D8', '#E282D9', '#E483DA', '#E584DA', '#E785DB', '#E986DC', '#EB87DC', '#EC88DD', '#EE89DE',
-//   '#F08ADE', '#F18BDF', '#F38CE0', '#F48DE0', '#F68EE1', '#F78FE2', '#F991E2', '#FA92E3', '#FC93E3', '#FD94E4',
-//   '#FE95E5', '#FF96E5', '#FF97E6', '#FF98E7', '#FF99E7', '#FF9BE8', '#FF9CE8', '#FF9DE9', '#FF9EE9', '#FF9FEA',
-//   '#FFA0EA', '#FFA2EB', '#FFA3EB', '#FFA4EC', '#FFA5EC', '#FFA6ED', '#FFA7ED', '#FFA8EE', '#FFAAEE', '#FFABEF',
-//   '#FFACEF', '#FFADEF', '#FFAEF0', '#FFAFF0', '#FFB0F0', '#FFB2F1', '#FFB3F1', '#FFB4F2', '#FFB5F2', '#FFB6F2',
-//   '#FFB8F3', '#FFB9F3', '#FFBAF3', '#FFBBF4', '#FFBCF4', '#FFBEF4', '#FFBFF5', '#FFC0F5', '#FFC1F5', '#FFC3F5',
-//   '#FFC4F6', '#FFC5F6', '#FFC6F6', '#FFC8F6', '#FFC9F7', '#FFCAF7', '#FFCBF7', '#FFCDF7', '#FFCEF8', '#FFCFF8',
-//   '#FFD0F8', '#FFD1F8', '#FFD3F9', '#FFD4F9', '#FFD5F9', '#FFD7F9', '#FFD8FA', '#FFD9FA', '#FFDAFA', '#FFDCFA',
-//   '#FFDDFA', '#FFDEFB', '#FFDFFB', '#FFE1FB', '#FFE2FB', '#FFE3FB', '#FFE5FB', '#FFE6FB', '#FFE7FB', '#FFE8FB',
-//   '#FFEAFB', '#FFEBFB', '#FFECFC', '#FFEDFC', '#FFEEFC', '#FFF0FC', '#FFF1FC', '#FFF2FC', '#FFF4FC', '#FFF5FC',
-//   '#FFF6FC', '#FFF7FC', '#FFF9FC', '#FFFAFD', '#FFFBFD', '#FFFCFD', '#FFFEFD', '#FFFFFD'
-// ];
 
 let dBData = [];
 let maxValSoundsDB = [];
@@ -187,41 +161,9 @@ function start() {
   }
   current_it_number = 0;
 
-  //this is in online mode
-  let query = document.getElementById("query_terms_input").value;
-
-  // Search sounds in Freesound and start loading them
-  if (query == undefined || query == "") {
-    query = default_query;
-  }
-
-    dBData = [];
-    maxValSoundsDB = [];
-    soundsWaveforms = [];
-
-  let url =
-    "https://freesound.org/apiv2/search/text/?query=" +
-    query +
-    "&group_by_pack=0" +
-    "&filter=duration:[" +
-    minDuration +
-    "+TO+" +
-    maxDuration +
-    "]&page_size=" +
-    numFiles +
-    "&fields=id,previews,name,analysis,url,username,images" +
-    "&token=" +
-    DEFAULT_TOKEN +
-    "&page=2";
-
-  console.log(url);
-  loadJSON(
-    function (data) {
-      load_data_from_fs_json(data);
-    },
-    url,
-    accessToken?.access_token
-  );
+  dBData = [];
+  maxValSoundsDB = [];
+  soundsWaveforms = [];
 }
 
 transformInputs.forEach((input, index) => {
@@ -245,11 +187,42 @@ switchButton.addEventListener("click", function() {
 });
 
 window.addEventListener("load", async function () {
-  AUTHORIZATION_CODE = getCodeFromURL();
-  accessToken = await getAccessToken();
-  getUserInfo(accessToken.access_token, function (userName) {
-    showUser(userName);
-  });
+  if(loginRedirected){
+    AUTHORIZATION_CODE = getCodeFromURL();
+    accessToken = await getAccessToken();
+    getUserInfo(accessToken.access_token, function (userName) {
+      showUser(userName);
+    });
+      //this is in online mode
+    let query = document.getElementById("query_terms_input").value;
+
+    // Search sounds in Freesound and start loading them
+    if (query == undefined || query == "") {
+      query = default_query;
+    }
+    let url =
+    "https://freesound.org/apiv2/search/text/?query=" +
+    query +
+    "&group_by_pack=0" +
+    "&filter=duration:[" +
+    minDuration +
+    "+TO+" +
+    maxDuration +
+    "]&page_size=" +
+    numFiles +
+    "&fields=id,previews,name,analysis,url,username,images" +
+    "&token=" +
+    accessToken?.access_token +
+    "&page=2";
+
+    loadJSON(
+      function (data) {
+        load_data_from_fs_json(data);
+      },
+      url,
+      accessToken?.access_token
+    );
+  }
 });
 
 function showUser(userName) {
@@ -277,6 +250,15 @@ function logout() {
   userNameElement.textContent = "";
   logoutButton.style.display = "none";
 }
+
+// Login popup
+window.onload = function () {
+  const overlay = document.querySelector(".overlay");
+  overlay.style.display = "block";
+
+  const popup = document.getElementById("loginPopup");
+  popup.style.display = "block";
+};
 
 arrowButton.addEventListener("click", function() {
   sidebar.classList.toggle("expanded");
