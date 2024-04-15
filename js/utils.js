@@ -236,13 +236,15 @@ function freesoundLogin() {
 }
 
 function getCodeFromURL() {
+  const CODE = "code"
   const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.has("code")){
+  if(urlParams.has(CODE)){
     loginRedirected = true;
+    return urlParams.get(CODE);
   }else{
     loginRedirected = false;
+    return null;
   }
-  return urlParams.get("code");
 }
 
 async function getAccessToken() {
