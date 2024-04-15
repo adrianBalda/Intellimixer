@@ -237,7 +237,7 @@ function freesoundLogin() {
 
 function getCodeFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.includes("code")){
+  if(urlParams.has("code")){
     loginRedirected = true;
   }else{
     loginRedirected = false;
