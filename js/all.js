@@ -58,6 +58,10 @@ let waveformAux;
 let audio_manager = new AudioManager();
 let MONO_MODE = true;
 
+// Repeated strings
+const DISPLAY_NONE = "none";
+const DISPLAY_BLOCK = "block";
+
 // Sounds and content
 let default_query = "footstep";
 let minDuration = 1;
@@ -86,6 +90,8 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const popup = document.getElementById("loginPopup");
+const overlay = document.querySelector(".overlay");
 const playSoundButton = document.getElementById("play-sound-button");
 const transformInputs = document.querySelectorAll('.transform-inputs');
 const arrowButton = document.querySelector(".round");
@@ -176,10 +182,10 @@ transformInputs.forEach((input, index) => {
 });
 
 switchButton.addEventListener("click", function() {
-  canvasWaveform.style.display = (canvasWaveform.style.display === "none") ? "block" : "none";
-  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === "none") ? "block" : "none";
+  canvasWaveform.style.display = (canvasWaveform.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
+  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
 
-  if (canvasWaveform.style.display === "none") {
+  if (canvasWaveform.style.display === DISPLAY_NONE) {
     switchButton.innerHTML = '<img src="https://img.icons8.com/external-smashingstocks-glyph-smashing-stocks/30/FFFFFF/external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks.png" alt="external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks"/>';
   } else {
     switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
@@ -188,6 +194,8 @@ switchButton.addEventListener("click", function() {
 
 window.addEventListener("load", async function () {
   if(loginRedirected){
+    popup.style.display = DISPLAY_NONE;
+    overlay.style.display = DISPLAY_NONE;
     AUTHORIZATION_CODE = getCodeFromURL();
     accessToken = await getAccessToken();
     getUserInfo(accessToken.access_token, function (userName) {
@@ -230,9 +238,9 @@ function showUser(userName) {
   const logout_user_container = document.getElementById("logout-user-container");
   const login_container = document.getElementById("login-container");
 
-  login_container.style.display = "none";
+  login_container.style.display = DISPLAY_NONE;
 
-  logout_user_container.style.display = "block";
+  logout_user_container.style.display = DISPLAY_BLOCK;
   userNameElement.textContent = userName;
 }
 
@@ -245,19 +253,17 @@ function logout() {
   const userNameElement = document.getElementById("userName");
   const logoutButton = document.getElementById("logoutButton");
 
-  loginButton.style.display = "block";
-  userContainer.style.display = "none";
+  loginButton.style.display = DISPLAY_BLOCK;
+  userContainer.style.display = DISPLAY_NONE;
   userNameElement.textContent = "";
-  logoutButton.style.display = "none";
+  logoutButton.style.display = DISPLAY_NONE;
 }
 
 // Login popup
 window.onload = function () {
-  const overlay = document.querySelector(".overlay");
-  overlay.style.display = "block";
+  overlay.style.display = DISPLAY_BLOCK;
 
-  const popup = document.getElementById("loginPopup");
-  popup.style.display = "block";
+  popup.style.display = DISPLAY_BLOCK;
 };
 
 arrowButton.addEventListener("click", function() {
@@ -697,8 +703,8 @@ function getSoundFromId(sound_id) {
 
 function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
   switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
-  switchButton.style.display = "block"
-  canvasSpectrogram.style.display = "none"
+  switchButton.style.display = DISPLAY_BLOCK
+  canvasSpectrogram.style.display = DISPLAY_NONE
 
   let html = "";
   html +=
@@ -721,7 +727,7 @@ function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, wavefor
   }
 // Para el espectrograma
   let audioData = new Float32Array(waveform_selected_Sound);
-  canvasWaveform.style.display = "block";
+  canvasWaveform.style.display = DISPLAY_BLOCK;
   canvasWaveform.width = soundInfoBox.offsetWidth;
   canvasWaveform.height = 100;
   soundInfoBox.appendChild(canvasWaveform);
