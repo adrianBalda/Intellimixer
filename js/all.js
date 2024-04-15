@@ -193,10 +193,10 @@ switchButton.addEventListener("click", function() {
 });
 
 window.addEventListener("load", async function () {
+  AUTHORIZATION_CODE = getCodeFromURL();
   if(loginRedirected){
     popup.style.display = DISPLAY_NONE;
     overlay.style.display = DISPLAY_NONE;
-    AUTHORIZATION_CODE = getCodeFromURL();
     accessToken = await getAccessToken();
     getUserInfo(accessToken.access_token, function (userName) {
       showUser(userName);

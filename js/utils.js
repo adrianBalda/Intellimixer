@@ -233,11 +233,15 @@ function freesoundLogin() {
     "&scope=" +
     scope;
   window.location.href = auth_url;
-  loginRedirected = true;
 }
 
 function getCodeFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.includes("code")){
+    loginRedirected = true;
+  }else{
+    loginRedirected = false;
+  }
   return urlParams.get("code");
 }
 
