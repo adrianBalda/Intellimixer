@@ -197,10 +197,12 @@ window.addEventListener("load", async function () {
   if(loginRedirected){
     popup.style.display = DISPLAY_NONE;
     overlay.style.display = DISPLAY_NONE;
-    accessToken = await getAccessToken();
-    getUserInfo(accessToken.access_token, function (userName) {
-      showUser(userName);
-    });
+    if(!accessToken){
+      accessToken = await getAccessToken();
+      getUserInfo(accessToken.access_token, function (userName) {
+        showUser(userName);
+      });
+    }
       //this is in online mode
     let query = document.getElementById("query_terms_input").value;
 
