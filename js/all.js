@@ -8,7 +8,7 @@ let AUTHORIZATION_CODE;
 let accessToken;
 // const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
 let loginRedirected = false;
-let isFirstLoaded = true;
+let loginSuccessful = 0;
 
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
@@ -117,8 +117,8 @@ let default_point_modulation = 0.6;
 let disp_scale = Math.min(w, h);
 let center_x = undefined; // Set in start()
 let center_y = undefined; // Set in start()
-// let disp_x_offset;
-// let disp_y_offset;
+let disp_x_offset;
+let disp_y_offset;
 let zoom_factor = undefined; // Set in start()
 let rotation_degrees = undefined; // Set in start()
 let min_zoom = 0.2;
@@ -243,7 +243,6 @@ window.addEventListener("load", async function () {
     }
     getSounds();
     loginRedirected = false;
-    isFirstLoaded = false;
   }
 });
 
