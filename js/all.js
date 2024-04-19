@@ -172,6 +172,41 @@ function start() {
   dBData = [];
   maxValSoundsDB = [];
   soundsWaveforms = [];
+
+  getSounds();
+}
+
+function getSounds(){
+  //this is in online mode
+  let query = document.getElementById("query_terms_input").value;
+
+  // Search sounds in Freesound and start loading them
+  if (query == undefined || query == "") {
+    query = default_query;
+  }
+  let url =
+  "https://freesound.org/apiv2/search/text/?query=" +
+  query +
+  "&group_by_pack=0" +
+  "&filter=duration:[" +
+  minDuration +
+  "+TO+" +
+  maxDuration +
+  "]&page_size=" +
+  numFiles +
+  "&fields=id,previews,name,analysis,url,username,images";
+
+  if(accessToken){
+    url = url + "&token=" + accessToken.access_token + "&page=2";
+  }
+
+  loadJSON(
+    function (data) {
+      load_data_from_fs_json(data);
+    },
+    url,
+    accessToken?.access_token
+  );  
 }
 
 transformInputs.forEach((input, index) => {
@@ -205,35 +240,7 @@ window.addEventListener("load", async function () {
         showUser(userName);
       });
     }
-      //this is in online mode
-    let query = document.getElementById("query_terms_input").value;
-
-    // Search sounds in Freesound and start loading them
-    if (query == undefined || query == "") {
-      query = default_query;
-    }
-    let url =
-    "https://freesound.org/apiv2/search/text/?query=" +
-    query +
-    "&group_by_pack=0" +
-    "&filter=duration:[" +
-    minDuration +
-    "+TO+" +
-    maxDuration +
-    "]&page_size=" +
-    numFiles +
-    "&fields=id,previews,name,analysis,url,username,images" +
-    "&token=" +
-    accessToken?.access_token +
-    "&page=2";
-
-    loadJSON(
-      function (data) {
-        load_data_from_fs_json(data);
-      },
-      url,
-      accessToken?.access_token
-    );
+    getSounds();
   }
 });
 
