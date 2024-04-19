@@ -230,8 +230,8 @@ switchButton.addEventListener("click", function() {
 });
 
 window.addEventListener("load", async function () {
-  AUTHORIZATION_CODE = getCodeFromURL();
   if(loginRedirected){
+    AUTHORIZATION_CODE = getCodeFromURL();
     popup.style.display = DISPLAY_NONE;
     overlay.style.display = DISPLAY_NONE;
     if(!accessToken){
