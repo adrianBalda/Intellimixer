@@ -116,6 +116,8 @@ let default_point_modulation = 0.6;
 let disp_scale = Math.min(w, h);
 let center_x = undefined; // Set in start()
 let center_y = undefined; // Set in start()
+let disp_x_offset;
+let disp_y_offset;
 let zoom_factor = undefined; // Set in start()
 let rotation_degrees = undefined; // Set in start()
 let min_zoom = 0.2;
@@ -244,21 +246,6 @@ function showUser(userName) {
 
   logout_user_container.style.display = DISPLAY_BLOCK;
   userNameElement.textContent = userName;
-}
-
-function logout() {
-  // accessToken = undefined;
-  // AUTHORIZATION_CODE = undefined;
-  // logoutFreesound();
-  const loginButton = document.getElementById("login");
-  const userContainer = document.getElementById("userContainer");
-  const userNameElement = document.getElementById("userName");
-  const logoutButton = document.getElementById("logoutButton");
-
-  loginButton.style.display = DISPLAY_BLOCK;
-  userContainer.style.display = DISPLAY_NONE;
-  userNameElement.textContent = "";
-  logoutButton.style.display = DISPLAY_NONE;
 }
 
 // Login popup
