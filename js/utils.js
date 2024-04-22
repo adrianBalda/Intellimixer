@@ -44,6 +44,41 @@ AudioManager.prototype.stopAllBufferNodes = function () {
   }
 };
 
+// Play Audio
+function playAudio() {
+  const audioContext = new AudioContext();
+  const audioSource = audioContext.createBufferSource();
+
+  // Buffer de audio con los datos muestreados
+  const audioBuffer = audioContext.createBuffer(1, currentSound.length, audioContext.sampleRate);
+  const channelData = audioBuffer.getChannelData(0);
+  channelData.set(currentSound);
+  audioSource.buffer = audioBuffer;
+
+  audioSource.connect(audioContext.destination);
+
+  audioSource.onended = function() {
+    updateProgress(1);
+  };
+  audioSource.onended();
+
+  audioSource.start();
+
+  // Progreso de reproducción en tiempo real
+  let animationId = requestAnimationFrame(updateProgressLoop);
+
+  function updateProgressLoop() {
+    const progress = audioContext.currentTime / audioBuffer.duration;
+    updateProgress(progress);
+
+    if (progress >= 1) {
+      cancelAnimationFrame(animationId);
+    } else {
+      animationId = requestAnimationFrame(updateProgressLoop);
+    }
+  }
+}
+
 /* Distance measures */
 
 function computeEuclideanDistance(p1x, p1y, p2x, p2y) {
@@ -191,7 +226,7 @@ function freesoundLogin() {
   logInfo("Login to Freesound!");
   const scope = "read";
   let auth_url =
-    "https://freesound.org/apiv2/oauth2/authorize/?client_id=" +
+    "https://freesound.org/apiv2/oauth2/logout_and_authorize/?client_id=" +
     CLIENT_ID +
     "&response_type=code&redirect_uri=" +
     encodeURIComponent(REDIRECT_URL) +
@@ -201,8 +236,16 @@ function freesoundLogin() {
 }
 
 function getCodeFromURL() {
+  const CODE = "code"
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("code");
+  if(urlParams.has(CODE) && loginSuccessful < 1){
+    loginRedirected = true;
+    loginSuccessful = 1;
+    return urlParams.get(CODE);
+  }else{
+    loginRedirected = false;
+    return null;
+  }
 }
 
 async function getAccessToken() {
@@ -227,7 +270,6 @@ async function getAccessToken() {
     }
 
     const responseData = await response.json();
-    console.log(responseData);
 
     return responseData;
   } catch (error) {
@@ -249,19 +291,6 @@ function getUserInfo(access_token, callback) {
   };
   xhr.send();
 }
-
-// Logout
-
-// function logoutFreesound(){
-//   const xhr = new XMLHttpRequest();
-//   xhr.open('GET', 'https://freesound.org/home/logout/?next=/', true);
-//   xhr.onreadystatechange = function() {
-//     if (xhr.readyState === 4 && xhr.status === 200) {
-//       console.log('Sesión de Freesound cerrada');
-//     }
-//   };
-//   xhr.send();
-// }
 
 /* Request parameters */
 

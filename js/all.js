@@ -6,7 +6,9 @@ const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const REDIRECT_URL = "https://adrianbalda.github.io/Intellimixer/";
 let AUTHORIZATION_CODE;
 let accessToken;
-const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+// const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
+let loginRedirected = false;
+let loginSuccessful = 0;
 
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
@@ -15,6 +17,29 @@ const menuContainer = document.querySelector(".menu-container");
 const menuHamburguesa = document.getElementById("menuHamburguesa");
 let menuVisible = false;
 // Menú Hamburguesa
+
+// Para el espectrograma
+const heatmapColors = [
+  '#000000', '#250066', '#4B0096', '#7200B6', '#9C00E6',
+  '#C601E6', '#ED01C2', '#FF00A2', '#FF007F', '#FF005A',
+  '#FF0036', '#FF0012', '#FF1100', '#FF2B00', '#FF4600',
+  '#FF6000', '#FF7A00', '#FF9400', '#FFAF00', '#FFC900',
+  '#FFE300', '#FFFD00', '#E8FF00', '#D3FF00', '#BEFF00',
+  '#A9FF00', '#94FF00', '#7FFF00', '#6EFF00', '#5DFF00',
+  '#4CFF00', '#3BFF00', '#2AFF00', '#1AFF00', '#09FF00',
+  '#00FF0A', '#00FF1B', '#00FF2C', '#00FF3D', '#00FF4E',
+  '#00FF5F', '#00FF70', '#00FF81', '#00FF92', '#00FFA3',
+  '#00FFB4', '#00FFC5', '#00FFD6', '#00FFE7', '#00FFF8',
+  '#00E6FF', '#00D2FF', '#00BDFF', '#00A8FF', '#0093FF',
+  '#007EFF', '#0069FF', '#0055FF', '#0040FF', '#002BFF',
+  '#0016FF', '#0000FF'
+];
+
+let dBData = [];
+let maxValSoundsDB = [];
+const canvasSpectrogram = document.getElementById('spectro');
+const ctxSpectrogram = canvasSpectrogram.getContext('2d');
+// Para el espectrograma
 
 // Variational Autoencoder stuff
 let encoderModel = undefined;
@@ -34,11 +59,16 @@ let waveformAux;
 let audio_manager = new AudioManager();
 let MONO_MODE = true;
 
+// Repeated strings
+const DISPLAY_NONE = "none";
+const DISPLAY_BLOCK = "block";
+
 // Sounds and content
 let default_query = "footstep";
 let minDuration = 1;
 let maxDuration = 2;
 let sounds = [];
+let currentSound = [];
 let sampledSounds = [];
 let extra_descriptors = undefined;
 let map_features = undefined;
@@ -61,21 +91,34 @@ let map_xy_y_max = undefined;
 let map_xy_y_min = undefined;
 
 // Canvas and display stuff
+const popup = document.getElementById("loginPopup");
+const overlay = document.querySelector(".overlay");
+const playSoundButton = document.getElementById("play-sound-button");
+const transformInputs = document.querySelectorAll('.transform-inputs');
 const arrowButton = document.querySelector(".round");
+const soundInfoBox = document.getElementById('sound_info_box');
+const switchButton = document.getElementById("switch-images-button");
 const sidebar = document.getElementById("sidebar");
 const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
-let canvasWave = document.getElementById('waveform-generated');
-let ctxWave = canvasWave.getContext('2d');
+let canvasWaveform = document.getElementById('waveform-generated');
+let progressContainer = document.getElementById('progressContainer');
+let canvasProgress = document.getElementById('canvasProgress');
+let ctxProgress = canvasProgress.getContext('2d');
+let ctxWaveform = canvasWaveform.getContext('2d');
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
+canvasProgress.width = progressContainer.offsetWidth;
+canvasProgress.height = 100;
 let w = window.innerWidth;
 let h = window.innerHeight;
 let default_point_modulation = 0.6;
 let disp_scale = Math.min(w, h);
 let center_x = undefined; // Set in start()
 let center_y = undefined; // Set in start()
+let disp_x_offset;
+let disp_y_offset;
 let zoom_factor = undefined; // Set in start()
 let rotation_degrees = undefined; // Set in start()
 let min_zoom = 0.2;
@@ -127,6 +170,14 @@ function start() {
   }
   current_it_number = 0;
 
+  dBData = [];
+  maxValSoundsDB = [];
+  soundsWaveforms = [];
+
+  getSounds();
+}
+
+function getSounds(){
   //this is in online mode
   let query = document.getElementById("query_terms_input").value;
 
@@ -134,40 +185,65 @@ function start() {
   if (query == undefined || query == "") {
     query = default_query;
   }
-
-    soundsWaveforms = [];
-
   let url =
-    "https://freesound.org/apiv2/search/text/?query=" +
-    query +
-    "&group_by_pack=0" +
-    "&filter=duration:[" +
-    minDuration +
-    "+TO+" +
-    maxDuration +
-    "]&page_size=" +
-    numFiles +
-    "&fields=id,previews,name,analysis,url,username,images" +
-    "&token=" +
-    DEFAULT_TOKEN +
-    "&page=2";
+  "https://freesound.org/apiv2/search/text/?query=" +
+  query +
+  "&group_by_pack=0" +
+  "&filter=duration:[" +
+  minDuration +
+  "+TO+" +
+  maxDuration +
+  "]&page_size=" +
+  numFiles +
+  "&fields=id,previews,name,analysis,url,username,images";
 
-  console.log(url);
+  if(accessToken){
+    url = url + "&token=" + accessToken.access_token + "&page=2";
+  }
+
   loadJSON(
     function (data) {
       load_data_from_fs_json(data);
     },
     url,
     accessToken?.access_token
-  );
+  );  
 }
+
+transformInputs.forEach((input, index) => {
+  const inputListener = () => {
+    const value = parseFloat(input.value);
+    applyEffects(index, value);
+  };
+
+  input.addEventListener('input', inputListener);
+});
+
+switchButton.addEventListener("click", function() {
+  canvasWaveform.style.display = (canvasWaveform.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
+  canvasSpectrogram.style.display = (canvasSpectrogram.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
+
+  if (canvasWaveform.style.display === DISPLAY_NONE) {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/external-smashingstocks-glyph-smashing-stocks/30/FFFFFF/external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks.png" alt="external-bar-graph-shopping-and-commerce-smashingstocks-glyph-smashing-stocks"/>';
+  } else {
+    switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
+  }
+});
 
 window.addEventListener("load", async function () {
   AUTHORIZATION_CODE = getCodeFromURL();
-  accessToken = await getAccessToken();
-  getUserInfo(accessToken.access_token, function (userName) {
-    showUser(userName);
-  });
+  if(loginRedirected){
+    popup.style.display = DISPLAY_NONE;
+    overlay.style.display = DISPLAY_NONE;
+    if(!accessToken){
+      accessToken = await getAccessToken();
+      getUserInfo(accessToken.access_token, function (userName) {
+        showUser(userName);
+      });
+    }
+    getSounds();
+    loginRedirected = false;
+  }
 });
 
 function showUser(userName) {
@@ -175,26 +251,18 @@ function showUser(userName) {
   const logout_user_container = document.getElementById("logout-user-container");
   const login_container = document.getElementById("login-container");
 
-  login_container.style.display = "none";
+  login_container.style.display = DISPLAY_NONE;
 
-  logout_user_container.style.display = "block";
+  logout_user_container.style.display = DISPLAY_BLOCK;
   userNameElement.textContent = userName;
 }
 
-function logout() {
-  // accessToken = undefined;
-  // AUTHORIZATION_CODE = undefined;
-  // logoutFreesound();
-  const loginButton = document.getElementById("login");
-  const userContainer = document.getElementById("userContainer");
-  const userNameElement = document.getElementById("userName");
-  const logoutButton = document.getElementById("logoutButton");
+// Login popup
+window.onload = function () {
+  overlay.style.display = DISPLAY_BLOCK;
 
-  loginButton.style.display = "block";
-  userContainer.style.display = "none";
-  userNameElement.textContent = "";
-  logoutButton.style.display = "none";
-}
+  popup.style.display = DISPLAY_BLOCK;
+};
 
 arrowButton.addEventListener("click", function() {
   sidebar.classList.toggle("expanded");
@@ -422,7 +490,8 @@ function load_data_from_fs_json(data) {
       (url = sound_json["url"]),
       (name = sound_json["name"]),
       (username = sound_json["username"]),
-      (image = sound_json["image"] || sound_json["images"]["spectral_m"])
+      // (image = sound_json["image"] || sound_json["images"]["spectral_m"])
+      (image = [sound_json["images"]["spectral_m"], sound_json["images"]["waveform_m"]])
     );
     sounds.push(sound);
 
@@ -434,7 +503,7 @@ function load_data_from_fs_json(data) {
       // TODO
       const signal = tf.tensor1d(adjustedWaveform);
       const frameLength = 512;
-      const frameStep = 248; // Para conseguir 64x256
+      const frameStep = Math.floor(frameLength / 4); // Si no, con 248 se obtiene 64x256
       const fftLength = 256;
       const signalTransformed = tf.signal
         .stft(signal, frameLength, frameStep, fftLength)
@@ -444,10 +513,36 @@ function load_data_from_fs_json(data) {
         const data = element.slice(0, 256);
         finalData.push(data);
       });
+      
+      if (finalData.length > 64) {
+        finalData.splice(64);
+      } else if (finalData.length < 64) {
+        const numRowsToAdd = 64 - finalData.length;
+        const lastRow = finalData[finalData.length - 1];
+        for (let i = 0; i < numRowsToAdd; i++) {
+          finalData.push(lastRow);
+        }
+      }
       let mcltspecTransposed = finalData[0].map((_, colIndex) =>
         finalData.map((row) => row[colIndex])
       );
       
+      // Para el espectrograma
+      const stftAbs = tf.abs(mcltspecTransposed);
+
+      // Convertir a decibelios (escala logarítmica)
+      const stftDb = tf.tidy(() => {
+        const minAmp = tf.max(stftAbs).div(1e6).clipByValue(1, Infinity);
+        const logSpec = tf.log(stftAbs.add(minAmp));
+        return logSpec.mul(10).div(tf.log(tf.scalar(10)));
+      });
+                  
+      // Obtener los valores de amplitud del espectrograma
+      const stftData = stftDb.arraySync();
+      dBData.push(stftData);
+      maxValSoundsDB.push(tf.max(stftData).dataSync()[0]);
+      // Para el espectrograma
+
       let mclt2Dspec = spectrogram(mcltspecTransposed);
       let { mu_latent_space, log_variance_latent_space } =
         encodeAudio(mclt2Dspec);
@@ -466,14 +561,20 @@ function checkSelectSound(x, y) {
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];
+  let spectro_selected_sound = [];
+  let max_value_spectro = [];
   let waveform_selected_Sound = [];
+  currentSound = [];
   for (i in sounds) {
     let sound = sounds[i];
     let dist = computeEuclideanDistance(sound.x, sound.y, x, y);
     if (dist < min_dist) {
       min_dist = dist;
       selected_sound = sound;
+      spectro_selected_sound = dBData[i];
+      max_value_spectro = maxValSoundsDB[i];
       waveform_selected_Sound = soundsWaveforms[i];
+      currentSound = soundsWaveforms[i];
     }
     distancesArray.push(dist);
   }
@@ -560,7 +661,7 @@ function checkSelectSound(x, y) {
   }
 }
 
-function selectSound(selected_sound, waveform_selected_Sound) {
+function selectSound(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
   selected_sound.selected = true;
   selected_sound.mod_amp = 5.0;
   if (MONO_MODE) {
@@ -571,7 +672,7 @@ function selectSound(selected_sound, waveform_selected_Sound) {
     showGeneratedSoundInfo(selected_sound.waveform);
   } else {
     audio_manager.loadSound(selected_sound.id, selected_sound.preview_url);
-    showSoundInfo(selected_sound, waveform_selected_Sound);
+    showSoundInfo(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound);
   }
   last_selected_sound_id = selected_sound["id"];
   selected_sound.selected = false;
@@ -598,11 +699,12 @@ function getSoundFromId(sound_id) {
   }
 }
 
-function showSoundInfo(sound, waveform_selected_Sound) {
+function showSoundInfo(sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound) {
+  switchButton.innerHTML = '<img src="https://img.icons8.com/external-ayo-icons-royyan-wijaya/30/FFFFFF/external-waveform-audio-video-line-ayo-icons-royyan-wijaya.png" alt="external-waveform-audio-video-line-ayo-icons-royyan-wijaya"/>';
+  switchButton.style.display = DISPLAY_BLOCK
+  canvasSpectrogram.style.display = DISPLAY_NONE
+
   let html = "";
-  if (sound.image !== undefined && sound.image !== "") {
-    html += '<img src="' + sound.image + '"/ class="sound_image"><br>';
-  }
   html +=
     sound.name +
     ' by <a href="' +
@@ -612,24 +714,65 @@ function showSoundInfo(sound, waveform_selected_Sound) {
     "</a>";
     const soundInfoContent = document.getElementById("sound_info_content");
 
+  // Para el espectrograma. Representar el espectrograma en el lienzo (canvas)
+  for (let y = 0; y < spectro_selected_sound.length; y++) {
+    for (let x = 0; x < spectro_selected_sound[y].length; x++) {
+      const colorValue = spectro_selected_sound[y][x];
+      const color = getColorFromValue(colorValue, max_value_spectro);
+      ctxSpectrogram.fillStyle = color;
+      ctxSpectrogram.fillRect(x, y, 1, 1);
+    }
+  }
+// Para el espectrograma
   let audioData = new Float32Array(waveform_selected_Sound);
-  canvasWave.style.display = "block";
-  canvasWave.width = document.getElementById('sound_info_box').offsetWidth;
-  canvasWave.height = 100;
-  document.getElementById('sound_info_box').appendChild(canvasWave);
-  drawWaveform(audioData);
+  canvasWaveform.style.display = DISPLAY_BLOCK;
+  canvasWaveform.width = soundInfoBox.offsetWidth;
+  canvasWaveform.height = 100;
+  soundInfoBox.appendChild(canvasWaveform);
+  drawWaveform(audioData, canvasWaveform, ctxWaveform);
   soundInfoContent.innerHTML = html;
+
+  //Para la transformacion
+  canvasProgress.width = progressContainer.offsetWidth;
+  canvasProgress.height = 100;
+  drawWaveform(audioData, canvasProgress, ctxProgress);
 }
 
-function drawWaveform(data) {
-  ctxWave.clearRect(0, 0, canvasWave.width, canvasWave.height);
-  ctxWave.strokeStyle = 'yellow';
-  ctxWave.beginPath();
-  ctxWave.moveTo(0, (1 + data[0]) * canvasWave.height / 2);
+function drawWaveform(data, waveCanvas, waveCtx) {
+  waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+  waveCtx.strokeStyle = 'yellow';
+  waveCtx.beginPath();
+  waveCtx.moveTo(0, (1 + data[0]) * waveCanvas.height / 2);
   for (let i = 1; i < data.length; i++) {
-    ctxWave.lineTo(i * canvasWave.width / data.length, (1 + data[i]) * canvasWave.height / 2);
+    waveCtx.lineTo(i * waveCanvas.width / data.length, (1 + data[i]) * waveCanvas.height / 2);
   }
-  ctxWave.stroke();
+  waveCtx.stroke();
+}
+
+function updateProgress(progress) {
+  const progressColor = 'orange';
+
+  drawWaveform(currentSound, canvasProgress, ctxProgress)
+
+  // Pintar progreso en color naranja
+  ctxProgress.strokeStyle = progressColor;
+  ctxProgress.beginPath();
+  ctxProgress.moveTo(0, (1 + currentSound[0]) * canvasProgress.height / 2);
+
+  const progressIndex = Math.floor(progress * currentSound.length);
+  for (let i = 1; i <= progressIndex; i++) {
+    const x = i * canvasProgress.width / currentSound.length;
+    const y = (1 + currentSound[i]) * canvasProgress.height / 2;
+    ctxProgress.lineTo(x, y);
+  }
+  ctxProgress.stroke();
+}
+
+// Para el espectrograma
+function getColorFromValue(value, maxValue) {
+  const normalizedValue = value / maxValue;
+  const colorIndex = Math.floor(normalizedValue * (heatmapColors.length - 1));
+  return heatmapColors[colorIndex];
 }
 
 function showGeneratedSoundInfo(waveform) {
