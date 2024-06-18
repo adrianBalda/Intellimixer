@@ -10,6 +10,12 @@ let accessToken;
 let loginRedirected = false;
 let loginSuccessful = 0;
 
+// Tutorial
+const tutorialPopup = document.getElementById('tutorial-popup');
+const openTutorialPopup = document.getElementById('open-tutorial-popup');
+const closeTutorialButton = document.getElementById('close-tutorial');
+// Tutorial
+
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
 const menuOptions = document.querySelector(".menu-options");
@@ -209,6 +215,16 @@ function getSounds(){
     accessToken?.access_token
   );  
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  closeTutorialButton.addEventListener('click', function() {
+      tutorialPopup.style.display = 'none';
+  });
+
+  openTutorialPopup.addEventListener('click', function() {
+    tutorialPopup.style.display = 'flex';
+  });
+});
 
 transformInputs.forEach((input, index) => {
   const inputListener = () => {
