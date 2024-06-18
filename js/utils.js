@@ -401,7 +401,7 @@ function hideUploadVAEs() {
 
 // Check sounds request durations
 function checkDurations() {
-  const submitBtn = document.getElementById("submit-btn");
+  const sendSoundRequest = document.getElementById("send-sound-request");
   const errorMessage = document.getElementById("error-message");
   const input_minDuration = parseInt(
     document.getElementById("query_min_time_input").value
@@ -421,11 +421,11 @@ function checkDurations() {
   }
 
   if (minDuration >= maxDuration) {
-    submitBtn.disabled = true;
+    sendSoundRequest.disabled = true;
     errorMessage.innerHTML = mensajeError;
     errorMessage.style.display = "block";
   } else {
-    submitBtn.disabled = false;
+    sendSoundRequest.disabled = false;
     errorMessage.style.display = "none";
   }
 }

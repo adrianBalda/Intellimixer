@@ -139,6 +139,54 @@ canvas {
     height: 4.5vw;
 }
 
+#source_type_query_box {
+  right: 20px;
+  top: 400px;
+}
+
+#instructions_box {
+  right: 1vw;
+  bottom: 1vw;
+  text-align: right;
+  pointer-events: none;
+}
+
+#x_axis_box {
+  width: 100%;
+  bottom: 20px;
+  text-align: center;
+  font-size: 22px;
+  pointer-events: none;
+}
+
+#y_axis_box {
+  height: 100%;
+  left: 20px;
+  writing-mode: vertical-rl;
+  text-align: center;
+  font-size: 22px;
+  pointer-events: none;
+}
+
+#sound_info_box {
+	left: 1vw;
+	flex-wrap: wrap; 
+  bottom: 0.2vw;
+  text-align: left;
+  width: 30vw;
+	display: flex;
+}
+
+#logo_box {
+  top: 20px;
+  left: 20px;
+  width: 200px;
+  pointer-events: none;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+/* Menu hamburguesa */
 #menu-user-container {
 	display: flex;
 	height: 2.5vw;
@@ -148,30 +196,8 @@ canvas {
 	flex-basis: 50%;
 }
 
-#logout-column {
-	flex-basis: 20%;
-}
-
 #menu-column {
 	flex-basis: 30%;
-}
-
-.logout-style {
-	display: none;
-}
-
-#logoutButton {
-	border: 2px solid white;
-	border-radius: 0.7vw;
-	background-color: transparent;
-	color: white;
-	width: 110%;
-	height: 1.6vw;
-}
-
-#logoutButton:hover {
-  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
-  border: 3px solid #00d7c3;
 }
 
 #query_box {
@@ -233,53 +259,49 @@ canvas {
   background-color: #444;
 }
 
-#source_type_query_box {
-  right: 20px;
-  top: 400px;
+.username-style {
+	display: none;
 }
 
-#instructions_box {
-  right: 1vw;
-  bottom: 1vw;
-  text-align: right;
-  pointer-events: none;
-}
-
-#x_axis_box {
-  width: 100%;
-  bottom: 20px;
+/* Boton pedir sonidos a Freesound */
+.request-sounds-button {
+  margin-top: 15px;
+  background-color: transparent;
+  border: 3px solid #bacbd4;
+  border-radius: 30px;
+  -webkit-transition: all 0.15s ease-in-out;
+  transition: all 0.15s ease-in-out;
+  color: #bacbd4;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Amazon Ember", sans-serif;
+  font-size: 13px;
+  line-height: 29px;
+  padding: 0 10px 0 11px;
+  position: relative;
   text-align: center;
-  font-size: 22px;
-  pointer-events: none;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  width: 100px;
 }
 
-#y_axis_box {
-  height: 100%;
-  left: 20px;
-  writing-mode: vertical-rl;
-  text-align: center;
-  font-size: 22px;
-  pointer-events: none;
+.request-sounds-button:hover:enabled {
+  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
+  border: 3px solid #00d7c3;
 }
 
-#sound_info_box {
-	left: 1vw;
-	flex-wrap: wrap; 
-  bottom: 0.2vw;
-  text-align: left;
-  width: 30vw;
-	display: flex;
+button:disabled,
+button[disabled] {
+  border: 1px solid #999999;
+  color: #666666;
 }
+/* Boton pedir sonidos a Freesound FIN */
 
-#logo_box {
-  top: 20px;
-  left: 20px;
-  width: 200px;
-  pointer-events: none;
-  font-weight: bold;
-  font-size: 30px;
-}
-
+/* Sound duration range */
 #query_terms_input {
   width: 150px;
   padding: 7px;
@@ -306,42 +328,6 @@ canvas {
   height: 30px;
 }
 
-.time-button {
-  margin-top: 15px;
-  background-color: transparent;
-  border: 3px solid #bacbd4;
-  border-radius: 30px;
-  -webkit-transition: all 0.15s ease-in-out;
-  transition: all 0.15s ease-in-out;
-  color: #bacbd4;
-  box-sizing: border-box;
-  cursor: pointer;
-  display: inline-block;
-  font-family: "Amazon Ember", sans-serif;
-  font-size: 13px;
-  line-height: 29px;
-  padding: 0 10px 0 11px;
-  position: relative;
-  text-align: center;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  vertical-align: middle;
-  width: 100px;
-}
-
-.time-button:hover:enabled {
-  box-shadow: 0 0 10px 0 #00d7c3 inset, 0 0 20px 2px #00d7c3;
-  border: 3px solid #00d7c3;
-}
-
-button:disabled,
-button[disabled] {
-  border: 1px solid #999999;
-  color: #666666;
-}
-
 .error {
   font-weight: bold;
   font-family: "Times New Roman", Times, serif;
@@ -356,6 +342,9 @@ button[disabled] {
   border: 1px solid #a33a3a;
   display: none;
 }
+/* Sound duration range FIN */
+
+/* Menu hamburguesa FIN */
 
 .axis {
   margin-top: 5%;
@@ -397,6 +386,7 @@ button[disabled] {
   border: 0px;
 }
 
+/* Caja para contener los logs */
 #info_placeholder {
   position: fixed;
   bottom: 15%;
@@ -427,6 +417,7 @@ button[disabled] {
 #info_placeholder::-webkit-scrollbar-thumb:hover {
   background-color: #333;
 }
+/* Caja para contener los logs FIN */
 
 #source_placeholder {
   height: 30px;
@@ -516,16 +507,6 @@ br {
   height: 38%;
   margin: 5%;
 }
-
-/* Para el texto de debajo de los inputs */
-/* .input-text {
-    text-align: center;
-    position: relative;
-    font-size: 60%;
-    width: 10%;
-    left: 27%;
-    top: 88%;
-} */
 
 #sidebar .transform-inputs {
   overflow: hidden;
@@ -676,3 +657,56 @@ br {
   animation-iteration-count: infinite;
   animation-timing-function: linear;
 }
+
+/* Tutorial Popup */
+.tutorial-popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.tutorial-popup-content {
+  background-color: white;
+  padding: 5vw;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-popup-content h2 {
+  font-size: 2vw;
+  font-weight: bold;
+  margin-bottom: 2vw;
+  text-align: center;
+}
+
+.tutorial-popup-text {
+  margin-bottom: 10%;
+  font-size: 1vw !important;
+}
+
+.tutorial-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 1vw;
+  border: none;
+  border-radius: 5%;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+}
+
+.tutorial-button:hover {
+  background-color: #45a049;
+}
+/* Tutorial Popup FIN */

@@ -6,9 +6,14 @@ const CLIENT_SECRET = "TEWsO3ETlZ8aDPuvWYfqPyhYo97sl5COg9xEz4mO";
 const REDIRECT_URL = "https://adrianbalda.github.io/Intellimixer/";
 let AUTHORIZATION_CODE;
 let accessToken;
-// const DEFAULT_TOKEN = "I7j6d2GhKndeNeAcJ4lnihzSpWP0YEQdfF2NSu6e";
 let loginRedirected = false;
 let loginSuccessful = 0;
+
+// Tutorial
+const tutorialPopup = document.getElementById('tutorial-popup');
+const openTutorialPopup = document.getElementById('open-tutorial-popup');
+const closeTutorialButton = document.getElementById('close-tutorial');
+// Tutorial
 
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
@@ -62,6 +67,7 @@ let MONO_MODE = true;
 // Repeated strings
 const DISPLAY_NONE = "none";
 const DISPLAY_BLOCK = "block";
+// Repeated strings
 
 // Sounds and content
 let default_query = "footstep";
@@ -210,6 +216,16 @@ function getSounds(){
   );  
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+  closeTutorialButton.addEventListener('click', function() {
+      tutorialPopup.style.display = 'none';
+  });
+
+  openTutorialPopup.addEventListener('click', function() {
+    tutorialPopup.style.display = 'flex';
+  });
+});
+
 transformInputs.forEach((input, index) => {
   const inputListener = () => {
     const value = parseFloat(input.value);
@@ -248,12 +264,12 @@ window.addEventListener("load", async function () {
 
 function showUser(userName) {
   const userNameElement = document.getElementById("userName");
-  const logout_user_container = document.getElementById("logout-user-container");
+  const username_container = document.getElementById("username-container");
   const login_container = document.getElementById("login-container");
 
   login_container.style.display = DISPLAY_NONE;
 
-  logout_user_container.style.display = DISPLAY_BLOCK;
+  username_container.style.display = DISPLAY_BLOCK;
   userNameElement.textContent = userName;
 }
 
@@ -305,7 +321,7 @@ document.getElementById('new-sound').addEventListener('click', function(event) {
   hideMenu();
 });
 
-document.getElementById('submit-btn').addEventListener('click', formSubmitHandler);
+document.getElementById('send-sound-request').addEventListener('click', formSubmitHandler);
 
 document.getElementById('upload-vaes').addEventListener('click', function(event) {
   event.preventDefault();
