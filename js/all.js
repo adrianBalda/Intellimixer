@@ -512,20 +512,20 @@ function SoundFactoryGeneratedAudios(id, waveform, x, y, latentSpace) {
 }
 
 function load_data_from_fs_json(data) {
-  let max = data["results"].length;
+  let max = data.results.length;
   let i = 0;
   let interval = setInterval(function () {
-    let sound_json = data["results"][i];
+      let sound_json = data.results[i];
     let sound = new SoundFactory(
-      (id = sound_json["id"]),
+        (id = sound_json.id),
       (preview_url =
-        sound_json["audio"] || sound_json["previews"]["preview-hq-mp3"]),
-      (analysis = sound_json["analysis"]),
-      (url = sound_json["url"]),
-      (name = sound_json["name"]),
-      (username = sound_json["username"]),
-      // (image = sound_json["image"] || sound_json["images"]["spectral_m"])
-      (image = [sound_json["images"]["spectral_m"], sound_json["images"]["waveform_m"]])
+          sound_json.audio || sound_json.previews.preview-hq-mp3),
+        (analysis = sound_json.analysis),
+        (url = sound_json.url),
+        (name = sound_json.name),
+        (username = sound_json.username),
+        // (image = sound_json.image || sound_json.image.spectral_m)
+        (image = [sound_json.image.spectral_m, sound_json.image.waveform_m])
     );
     sounds.push(sound);
 
