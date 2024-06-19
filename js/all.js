@@ -85,7 +85,8 @@ let default_query = "footstep";
 let minDuration = 1;
 let maxDuration = 2;
 let sounds = [];
-let currentSound = [];
+let selectedSound;
+let currentSoundSamples = [];
 let sampledSounds = [];
 let extra_descriptors = undefined;
 let map_features = undefined;
@@ -239,8 +240,8 @@ applyEffectsButton.addEventListener('click', () => {
   gainControl.value = 1;
   gainValue.textContent = `1.0`;
 
-  if(currentSound.length){
-      let audioData = new Float32Array(currentSound);
+  if(currentSoundSamples.length){
+      let audioData = new Float32Array(currentSoundSamples);
       canvasProgress.width = progressContainer.offsetWidth;
       canvasProgress.height = window.innerWidth * 0.1;
       drawWaveform(audioData, canvasProgress, ctxProgress);    
@@ -597,17 +598,18 @@ function checkSelectSound(x, y) {
   let spectro_selected_sound = [];
   let max_value_spectro = [];
   let waveform_selected_Sound = [];
-  currentSound = [];
+  currentSoundSamples = [];
   for (i in sounds) {
     let sound = sounds[i];
     let dist = computeEuclideanDistance(sound.x, sound.y, x, y);
     if (dist < min_dist) {
       min_dist = dist;
       selected_sound = sound;
+      selectedSound = sound;
       spectro_selected_sound = dBData[i];
       max_value_spectro = maxValSoundsDB[i];
       waveform_selected_Sound = soundsWaveforms[i];
-      currentSound = soundsWaveforms[i];
+      currentSoundSamples = soundsWaveforms[i];
     }
     distancesArray.push(dist);
   }
@@ -617,6 +619,7 @@ function checkSelectSound(x, y) {
     if (dist < min_dist) {
       min_dist = dist;
       selected_sound = sound;
+      selectedSound = sound;
     }
   }
   if (min_dist < 0.02) {
@@ -785,17 +788,17 @@ function drawWaveform(data, waveCanvas, waveCtx) {
 function updateProgress(progress) {
   const progressColor = 'orange';
 
-  drawWaveform(currentSound, canvasProgress, ctxProgress)
+  drawWaveform(currentSoundSamples, canvasProgress, ctxProgress)
 
   // Pintar progreso en color naranja
   ctxProgress.strokeStyle = progressColor;
   ctxProgress.beginPath();
-  ctxProgress.moveTo(0, (1 + currentSound[0]) * canvasProgress.height / 2);
+  ctxProgress.moveTo(0, (1 + currentSoundSamples[0]) * canvasProgress.height / 2);
 
-  const progressIndex = Math.floor(progress * currentSound.length);
+  const progressIndex = Math.floor(progress * currentSoundSamples.length);
   for (let i = 1; i <= progressIndex; i++) {
-    const x = i * canvasProgress.width / currentSound.length;
-    const y = (1 + currentSound[i]) * canvasProgress.height / 2;
+    const x = i * canvasProgress.width / currentSoundSamples.length;
+    const y = (1 + currentSoundSamples[i]) * canvasProgress.height / 2;
     ctxProgress.lineTo(x, y);
   }
   ctxProgress.stroke();
