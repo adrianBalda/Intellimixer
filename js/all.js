@@ -514,6 +514,10 @@ function SoundFactoryGeneratedAudios(id, waveform, x, y, latentSpace) {
 function load_data_from_fs_json(data) {
   let max = data.results.length;
   let i = 0;
+  try{
+    if(!data.results.length){
+      throw new Error("Couldn´t find sounds for that request")
+    }
   let interval = setInterval(function () {
       let sound_json = data.results[i];
     let sound = new SoundFactory(
@@ -589,6 +593,9 @@ function load_data_from_fs_json(data) {
       clearInterval(interval);
     }
   }, 1000);
+  }catch(error){
+    console.log(error.message)
+  }
 }
 
 function checkSelectSound(x, y) {
