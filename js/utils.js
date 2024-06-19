@@ -429,39 +429,3 @@ function checkDurations() {
     errorMessage.style.display = "none";
   }
 }
-
-// Slide button functions
-function slideButton(expanded){
-  const arrowElements = document.querySelectorAll("#cta .arrow");
-  const nextElements = document.querySelectorAll(".next");
-
-  if (expanded) {
-    if (queryForm.style.display === "block") {
-      hideForm();
-    }
-  
-    if (uploadVAEs.style.display === "block") {
-      hideUploadVAEs();
-    }
-  
-    nextElements.forEach(element => {
-      element.style.transform = "none";
-    });
-    arrowElements.forEach(element => {
-      element.style.left = "30%";
-    });
-    transformationInputs.forEach(element => {
-      element.style.display = "block";
-    });
-  } else {
-    nextElements.forEach(element => {
-      element.style.transform = "";
-    });
-    arrowElements.forEach(element => {
-      element.style.left = "20%";
-    });
-    transformationInputs.forEach(element => {
-      element.style.display = "none";
-    });
-  }
-}

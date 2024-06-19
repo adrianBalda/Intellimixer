@@ -99,13 +99,8 @@ let map_xy_y_min = undefined;
 // Canvas and display stuff
 const popup = document.getElementById("loginPopup");
 const overlay = document.querySelector(".overlay");
-const playSoundButton = document.getElementById("play-sound-button");
-const transformInputs = document.querySelectorAll('.transform-inputs');
-const arrowButton = document.querySelector(".round");
 const soundInfoBox = document.getElementById('sound_info_box');
 const switchButton = document.getElementById("switch-images-button");
-const sidebar = document.getElementById("sidebar");
-const transformationInputs = document.querySelector(".transform-inputs");
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
 let canvasWaveform = document.getElementById('waveform-generated');
@@ -226,15 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-transformInputs.forEach((input, index) => {
-  const inputListener = () => {
-    const value = parseFloat(input.value);
-    applyEffects(index, value);
-  };
-
-  input.addEventListener('input', inputListener);
-});
-
 switchButton.addEventListener("click", function() {
   canvasWaveform.style.display = (canvasWaveform.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
   canvasSpectrogram.style.display = (canvasSpectrogram.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
@@ -279,14 +265,6 @@ window.onload = function () {
 
   popup.style.display = DISPLAY_BLOCK;
 };
-
-arrowButton.addEventListener("click", function() {
-  sidebar.classList.toggle("expanded");
-  arrowButton.classList.toggle("expanded");
-
-  const expanded = sidebar.classList.contains("expanded");
-  slideButton(expanded)
-});
 
 let formSubmitHandler = function formSubmitHandler(event) {
   event.preventDefault();

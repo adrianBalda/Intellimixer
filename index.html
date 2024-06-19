@@ -96,31 +96,6 @@
             <select id="y_axis_map_descriptors_selector" onchange="changeAxisAttribute()">
             </select>
         </div>
-        <div class="center-con">
-            <div class="round">
-                <div id="cta">
-                    <span class="arrow first next "></span>
-                    <span class="arrow second next "></span>
-                </div>
-            </div>
-            <div id="sidebar">
-                <p class="transformation-tittle">Sounds Transformations</p>
-                <div id="progressContainer">
-                    <canvas id="canvasProgress" class="waveform-progress"></canvas>
-                </div>
-                    
-                <div class="inputs-containers">
-                    <div id="play-sound-button" onclick="playAudio()">
-                        <img class="play-icon" src="https://img.icons8.com/ios/50/FFFFFF/circled-play--v1.png" alt="circled-play--v1"/>
-                    </div>
-                    <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
-                    <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
-                    <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
-                    <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
-                    <input type="range" min="-40" max="40" step="0.1" class="transform-inputs">
-                </div>
-            </div>
-        </div>        
         <div id="info_placeholder">
             <div class="scroll-info-placeholder"></div>
         </div>
@@ -170,7 +145,6 @@
     <script src="js/audioengine.js"></script>
     <script src="js/tsne.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/transformations.js"></script>
     <script src="js/vaeUtils.js"></script>
     <script src="js/all.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.web.js"></script>
