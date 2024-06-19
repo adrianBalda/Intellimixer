@@ -21,7 +21,18 @@ const menuOptions = document.querySelector(".menu-options");
 const menuContainer = document.querySelector(".menu-container");
 const menuHamburguesa = document.getElementById("menuHamburguesa");
 let menuVisible = false;
+const queryForm = document.getElementById("query-form");
+const uploadVAEs = document.getElementById('upload-vaes-div');
 // Menú Hamburguesa
+
+// Transformacion de sonidos
+const applyEffectsButton = document.getElementById('applyEffectsButton');
+const gainControl = document.getElementById('gainControl');
+const gainValue = document.getElementById('gainValue');
+const speedControl = document.getElementById('speedControl');
+const speedValue = document.getElementById('speedValue');
+const effectsPopup = document.getElementById('effectsPopup');
+// Transformacion de sonidos FIN
 
 // Para el espectrograma
 const heatmapColors = [
@@ -101,8 +112,6 @@ const popup = document.getElementById("loginPopup");
 const overlay = document.querySelector(".overlay");
 const soundInfoBox = document.getElementById('sound_info_box');
 const switchButton = document.getElementById("switch-images-button");
-const queryForm = document.getElementById("query-form");
-const uploadVAEs = document.getElementById('upload-vaes-div');
 let canvasWaveform = document.getElementById('waveform-generated');
 let progressContainer = document.getElementById('progressContainer');
 let canvasProgress = document.getElementById('canvasProgress');
@@ -220,6 +229,36 @@ document.addEventListener('DOMContentLoaded', function() {
     tutorialPopup.style.display = 'flex';
   });
 });
+
+// Efectos de Sonido
+applyEffectsButton.addEventListener('click', () => {
+  effectsPopup.style.display = 'block';
+  overlay.style.display = 'block';
+  speedControl.value = 1;
+  speedValue.textContent = `x1.0`;
+  gainControl.value = 1;
+  gainValue.textContent = `1.0`;
+
+  if(currentSound.length){
+      let audioData = new Float32Array(currentSound);
+      canvasProgress.width = progressContainer.offsetWidth;
+      canvasProgress.height = window.innerWidth * 0.1;
+      drawWaveform(audioData, canvasProgress, ctxProgress);    
+  }
+});
+
+overlay.addEventListener('click', () => {
+  effectsPopup.style.display = 'none';
+  overlay.style.display = 'none';
+  if (audioSource) {
+      audioSource.stop(); // Si se esta reproduciendo el audio al salir de la transformacion de sonidos, se para.
+  }    
+});
+
+effectsPopup.addEventListener('click', (event) => {
+  event.stopPropagation();
+});
+// Efectos de Sonido FIN
 
 switchButton.addEventListener("click", function() {
   canvasWaveform.style.display = (canvasWaveform.style.display === DISPLAY_NONE) ? DISPLAY_BLOCK : DISPLAY_NONE;
