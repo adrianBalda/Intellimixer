@@ -238,8 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Efectos de Sonido
 applyEffectsButton.addEventListener('click', () => {
-  effectsPopup.style.display = 'block';
-  overlay.style.display = 'block';
+  effectsPopup.style.display = DISPLAY_BLOCK;
+  overlay.style.display = DISPLAY_BLOCK;
   speedControl.value = 1;
   speedValue.textContent = `x1.0`;
   gainControl.value = 1;
@@ -624,7 +624,7 @@ function load_data_from_fs_json(data) {
 }
 
 function checkSelectSound(x, y) {
-  applyEffectsButton.style.display = 'block';
+  applyEffectsButton.style.display = DISPLAY_BLOCK;
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];
