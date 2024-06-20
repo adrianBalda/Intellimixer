@@ -21,6 +21,7 @@ gainControl.addEventListener('input', function() {
 });
 
 function playAudio() {
+    audio_manager.stopAllBufferNodes();
     if (audioSource) {
         audioSource.stop();
     }
