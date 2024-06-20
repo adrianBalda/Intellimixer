@@ -540,6 +540,7 @@ function load_data_from_fs_json(data) {
         querySoundsRequested = default_query;
       }
       const message = `Couldn´t find "${querySoundsRequested}" sounds in Freesound.`;
+      logInfo(message)
       showSnackbar(message + " Please, try again with another sound!");
       throw new Error(message)
     }

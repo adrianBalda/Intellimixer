@@ -389,8 +389,8 @@ button[disabled] {
 /* Caja para contener los logs */
 #info_placeholder {
   position: fixed;
-  bottom: 15%;
-  height: 5vw;
+  bottom: 5%;
+  height: 7vw;
   width: 22vw;
   right: 1vw;
   overflow-y: scroll;
