@@ -624,6 +624,7 @@ function load_data_from_fs_json(data) {
 }
 
 function checkSelectSound(x, y) {
+  applyEffectsButton.style.display = 'block';
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];

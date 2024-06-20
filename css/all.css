@@ -500,6 +500,12 @@ br {
 }
 /* Tutorial Popup FIN */
 
+/* Boton de efectos */
+#applyEffectsButton{
+	display: none;
+}
+/* Boton de efectos FIN */
+
 /* Popup transformacion de sonidos */
 .sound-effects-popup {
 	display: none;
