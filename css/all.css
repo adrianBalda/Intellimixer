@@ -482,6 +482,7 @@ br {
 .tutorial-popup-text {
   margin-bottom: 10%;
   font-size: 1vw !important;
+  text-align: justify;
 }
 
 .tutorial-button {
