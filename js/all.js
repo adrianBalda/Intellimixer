@@ -238,8 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Efectos de Sonido
 applyEffectsButton.addEventListener('click', () => {
-  effectsPopup.style.display = 'block';
-  overlay.style.display = 'block';
+  effectsPopup.style.display = DISPLAY_BLOCK;
+  overlay.style.display = DISPLAY_BLOCK;
   speedControl.value = 1;
   speedValue.textContent = `x1.0`;
   gainControl.value = 1;
@@ -548,13 +548,13 @@ function load_data_from_fs_json(data) {
       let sound = new SoundFactory(
           (id = sound_json.id),
           (preview_url =
-            sound_json.audio || sound_json.previews.preview-hq-mp3),
+            sound_json.audio || sound_json.previews["preview-hq-mp3"]),
           (analysis = sound_json.analysis),
           (url = sound_json.url),
           (name = sound_json.name),
           (username = sound_json.username),
-          // (image = sound_json.image || sound_json.image.spectral_m)
-          (image = [sound_json.image.spectral_m, sound_json.image.waveform_m])
+          // (image = sound_json.images || sound_json.images.spectral_m)
+          (image = [sound_json.images.spectral_m, sound_json.images.waveform_m])
       );
       sounds.push(sound);
 
@@ -624,6 +624,7 @@ function load_data_from_fs_json(data) {
 }
 
 function checkSelectSound(x, y) {
+  applyEffectsButton.style.display = DISPLAY_BLOCK;
   let min_dist = 9999;
   let selected_sound = false;
   let distancesArray = [];
