@@ -743,7 +743,7 @@ function selectSound(selected_sound, spectro_selected_sound, max_value_spectro, 
     audio_manager.loadSound(selected_sound.id, selected_sound.preview_url);
     showSoundInfo(selected_sound, spectro_selected_sound, max_value_spectro, waveform_selected_Sound);
   }
-  last_selected_sound_id = selected_sound["id"];
+  last_selected_sound_id = selected_sound.id;
   selected_sound.selected = false;
   selected_sound.mod_amp = default_point_modulation;
 }

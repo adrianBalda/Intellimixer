@@ -482,6 +482,7 @@ br {
 .tutorial-popup-text {
   margin-bottom: 10%;
   font-size: 1vw !important;
+  text-align: justify;
 }
 
 .tutorial-button {
@@ -518,8 +519,8 @@ br {
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	z-index: 2;
-	height: 30%;
-    width: 30%;
+	height: 50%;
+  width: 40%;
 }
 
 .overlay {
@@ -536,7 +537,7 @@ br {
 .columns {
 	display: flex;
 	width: 100%;
-	top: 50%;
+	top: 60%;
   position: relative;
 }
 
@@ -559,13 +560,22 @@ br {
 }
 
 .waveform-progress {
-	top: 15%
+	top: 20%
 }
 
 .transformation-tittle {
   text-align: center;
   position: relative;
   font-size: 120%;
+}
+
+.controls-column {
+  justify-content: center;
+  margin-top: 1%;
+}
+
+.control-group {
+  margin-bottom: 5%;
 }
 /* Popup transformacion de sonidos FIN */
 
