@@ -562,3 +562,74 @@ br {
   font-size: 120%;
 }
 /* Popup transformacion de sonidos FIN */
+
+/* Snackbar when no sounds are found in Freesound */
+#snackbar {
+  visibility: hidden;
+  max-width: 90%;
+  margin: 0 auto;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 8%;
+  font-size: 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 9.5s;
+  animation: fadein 0.5s, fadeout 0.5s 9.5s;
+}
+
+#closeSnackbar {
+  background: none;
+  color: #fff;
+  border: none;
+  font-size: 17px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+@-webkit-keyframes fadein {
+  from {bottom: 0; opacity: 0;} 
+  to {bottom: 8%; opacity: 1;}
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 8%; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+  from {bottom: 8%; opacity: 1;} 
+  to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+  from {bottom: 8%; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+
+@media only screen and (max-width: 600px) {
+  #snackbar {
+    font-size: 14px;
+    padding: 12px;
+    max-width: 95%;
+  }
+
+  #closeSnackbar {
+    font-size: 14px;
+    margin-left: 5px;
+  }
+}
+/* Snackbar when no sounds are found in Freesound FIN */

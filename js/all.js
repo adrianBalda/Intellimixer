@@ -13,7 +13,12 @@ let loginSuccessful = 0;
 const tutorialPopup = document.getElementById('tutorial-popup');
 const openTutorialPopup = document.getElementById('open-tutorial-popup');
 const closeTutorialButton = document.getElementById('close-tutorial');
-// Tutorial
+// Tutorial FIN
+
+// Snackbar
+let snackbar = document.getElementById("snackbar");
+let snackbarMessage = document.getElementById("snackbarMessage");
+// Snackbar FIN
 
 //Menú Hamburguesa
 const menuButton = document.querySelector(".menu-button");
@@ -23,7 +28,7 @@ const menuHamburguesa = document.getElementById("menuHamburguesa");
 let menuVisible = false;
 const queryForm = document.getElementById("query-form");
 const uploadVAEs = document.getElementById('upload-vaes-div');
-// Menú Hamburguesa
+// Menú Hamburguesa FIN
 
 // Transformacion de sonidos
 const applyEffectsButton = document.getElementById('applyEffectsButton');
@@ -347,6 +352,20 @@ document.getElementById('upload-vaes').addEventListener('click', function(event)
   hideMenu();
 });
 
+function showSnackbar(message) {
+  snackbarMessage.innerHTML = message;
+  snackbar.className = "show";
+  setTimeout(function() { 
+    if (snackbar.className === "show") {
+      snackbar.className = snackbar.className.replace("show", ""); 
+    }
+  }, 10000);
+}
+
+function closeSnackbar() {
+  snackbar.className = snackbar.className.replace("show", "");
+}
+
 function changeAxisAttribute() {
   all_loaded = false;
   current_it_number = 0;
@@ -516,83 +535,89 @@ function load_data_from_fs_json(data) {
   let i = 0;
   try{
     if(!data.results.length){
-      throw new Error("Couldn´t find sounds for that request")
-    }
-  let interval = setInterval(function () {
-      let sound_json = data.results[i];
-    let sound = new SoundFactory(
-        (id = sound_json.id),
-      (preview_url =
-          sound_json.audio || sound_json.previews.preview-hq-mp3),
-        (analysis = sound_json.analysis),
-        (url = sound_json.url),
-        (name = sound_json.name),
-        (username = sound_json.username),
-        // (image = sound_json.image || sound_json.image.spectral_m)
-        (image = [sound_json.image.spectral_m, sound_json.image.waveform_m])
-    );
-    sounds.push(sound);
-
-    getWaveformFromPreview(function (waveform) {
-      let adjustedWaveform = adjustAudioToExpectedSize(waveform, 22050);
-      sessionId += 1;
-      soundsWaveforms.push(waveform);
-
-      // TODO
-      const signal = tf.tensor1d(adjustedWaveform);
-      const frameLength = 512;
-      const frameStep = Math.floor(frameLength / 4); // Si no, con 248 se obtiene 64x256
-      const fftLength = 256;
-      const signalTransformed = tf.signal
-        .stft(signal, frameLength, frameStep, fftLength)
-        .arraySync();
-      const finalData = [];
-      signalTransformed.forEach((element) => {
-        const data = element.slice(0, 256);
-        finalData.push(data);
-      });
-      
-      if (finalData.length > 64) {
-        finalData.splice(64);
-      } else if (finalData.length < 64) {
-        const numRowsToAdd = 64 - finalData.length;
-        const lastRow = finalData[finalData.length - 1];
-        for (let i = 0; i < numRowsToAdd; i++) {
-          finalData.push(lastRow);
-        }
+      let querySoundsRequested = document.getElementById("query_terms_input").value;
+      if(!querySoundsRequested){
+        querySoundsRequested = default_query;
       }
-      let mcltspecTransposed = finalData[0].map((_, colIndex) =>
-        finalData.map((row) => row[colIndex])
-      );
-      
-      // Para el espectrograma
-      const stftAbs = tf.abs(mcltspecTransposed);
-
-      // Convertir a decibelios (escala logarítmica)
-      const stftDb = tf.tidy(() => {
-        const minAmp = tf.max(stftAbs).div(1e6).clipByValue(1, Infinity);
-        const logSpec = tf.log(stftAbs.add(minAmp));
-        return logSpec.mul(10).div(tf.log(tf.scalar(10)));
-      });
-                  
-      // Obtener los valores de amplitud del espectrograma
-      const stftData = stftDb.arraySync();
-      dBData.push(stftData);
-      maxValSoundsDB.push(tf.max(stftData).dataSync()[0]);
-      // Para el espectrograma
-
-      let mclt2Dspec = spectrogram(mcltspecTransposed);
-      let { mu_latent_space, log_variance_latent_space } =
-        encodeAudio(mclt2Dspec);
-      let latent_space_size = mu_latent_space.length;
-      mu_latent_spaces.push(mu_latent_space);
-      log_variance_latent_spaces.push(log_variance_latent_space);
-    }, sound.preview_url);
-    i++;
-    if (i == max) {
-      clearInterval(interval);
+      const message = `Couldn´t find "${querySoundsRequested}" sounds in Freesound.`;
+      showSnackbar(message + " Please, try again with another sound!");
+      throw new Error(message)
     }
-  }, 1000);
+    let interval = setInterval(function () {
+      let sound_json = data.results[i];
+      let sound = new SoundFactory(
+          (id = sound_json.id),
+          (preview_url =
+            sound_json.audio || sound_json.previews.preview-hq-mp3),
+          (analysis = sound_json.analysis),
+          (url = sound_json.url),
+          (name = sound_json.name),
+          (username = sound_json.username),
+          // (image = sound_json.image || sound_json.image.spectral_m)
+          (image = [sound_json.image.spectral_m, sound_json.image.waveform_m])
+      );
+      sounds.push(sound);
+
+      getWaveformFromPreview(function (waveform) {
+        let adjustedWaveform = adjustAudioToExpectedSize(waveform, 22050);
+        sessionId += 1;
+        soundsWaveforms.push(waveform);
+
+        // TODO
+        const signal = tf.tensor1d(adjustedWaveform);
+        const frameLength = 512;
+        const frameStep = Math.floor(frameLength / 4); // Si no, con 248 se obtiene 64x256
+        const fftLength = 256;
+        const signalTransformed = tf.signal
+          .stft(signal, frameLength, frameStep, fftLength)
+          .arraySync();
+        const finalData = [];
+        signalTransformed.forEach((element) => {
+          const data = element.slice(0, 256);
+          finalData.push(data);
+        });
+        
+        if (finalData.length > 64) {
+          finalData.splice(64);
+        } else if (finalData.length < 64) {
+          const numRowsToAdd = 64 - finalData.length;
+          const lastRow = finalData[finalData.length - 1];
+          for (let i = 0; i < numRowsToAdd; i++) {
+            finalData.push(lastRow);
+          }
+        }
+        let mcltspecTransposed = finalData[0].map((_, colIndex) =>
+          finalData.map((row) => row[colIndex])
+        );
+        
+        // Para el espectrograma
+        const stftAbs = tf.abs(mcltspecTransposed);
+
+        // Convertir a decibelios (escala logarítmica)
+        const stftDb = tf.tidy(() => {
+          const minAmp = tf.max(stftAbs).div(1e6).clipByValue(1, Infinity);
+          const logSpec = tf.log(stftAbs.add(minAmp));
+          return logSpec.mul(10).div(tf.log(tf.scalar(10)));
+        });
+                    
+        // Obtener los valores de amplitud del espectrograma
+        const stftData = stftDb.arraySync();
+        dBData.push(stftData);
+        maxValSoundsDB.push(tf.max(stftData).dataSync()[0]);
+        // Para el espectrograma
+
+        let mclt2Dspec = spectrogram(mcltspecTransposed);
+        let { mu_latent_space, log_variance_latent_space } =
+          encodeAudio(mclt2Dspec);
+        let latent_space_size = mu_latent_space.length;
+        mu_latent_spaces.push(mu_latent_space);
+        log_variance_latent_spaces.push(log_variance_latent_space);
+      }, sound.preview_url);
+      i++;
+      if (i == max) {
+        clearInterval(interval);
+      }
+    }, 1000);
   }catch(error){
     console.log(error.message)
   }

@@ -59,10 +59,10 @@
             <form>
                 <input id="query_terms_input" type="text" placeholder="Footstep">
                 <p><br>Select minimum sounds duration (in seconds)</p>
-                <input type="number" min="1" max="14" oninput="checkDurations()" id="query_min_time_input"
+                <input type="number" min="1" max="58" oninput="checkDurations()" id="query_min_time_input"
                     placeholder="1">
                 <p><br>Select maximum sounds duration (in seconds)</p>
-                <input type="number" min="2" max="15" oninput="checkDurations()" id="query_max_time_input"
+                <input type="number" min="2" max="59" oninput="checkDurations()" id="query_max_time_input"
                     placeholder="2">
                 <div>
                     <button type="submit" id="send-sound-request" class="request-sounds-button">Lets Goo!</button>
@@ -141,19 +141,21 @@
         Scroll wheel to zoom<br>
     </div>  
 
-    <div id="x_axis_box" class="box">
-    </div>
+    <div id="x_axis_box" class="box"></div>
 
-    <div id="y_axis_box" class="box">
-    </div>
-
-    
+    <div id="y_axis_box" class="box"></div>
+        
     <div id="sound_info_box" class="box">
         <canvas id="waveform-generated" class="waveform-style"></canvas>
         <canvas id="spectro" class="spectrogram" style="display: none;"></canvas>
         <div id="sound_info_content"></div>
         <div id="switch-images-button" class="switch-button">
         </div>
+    </div>
+
+    <div id="snackbar">
+        <span id="snackbarMessage"></span>
+        <button id="closeSnackbar" onclick="closeSnackbar()">X</button>
     </div>
 
     <div id="logo_box" class="box">
