@@ -45,7 +45,8 @@ function playAudio() {
         audioSource.onended = function() {
             updateProgress(1);
         };
-
+        const message = "Applying effects to the selected sound"
+        logInfo(message)
         audioSource.start();
 
         // Progreso de reproducción en tiempo real

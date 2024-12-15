@@ -83,6 +83,7 @@ let MONO_MODE = true;
 // Repeated strings
 const DISPLAY_NONE = "none";
 const DISPLAY_BLOCK = "block";
+const DISPLAY_FLEX = "flex";
 // Repeated strings
 
 // Sounds and content
@@ -228,11 +229,11 @@ function getSounds(){
 
 document.addEventListener('DOMContentLoaded', function() {
   closeTutorialButton.addEventListener('click', function() {
-      tutorialPopup.style.display = 'none';
+      tutorialPopup.style.display = DISPLAY_NONE;
   });
 
   openTutorialPopup.addEventListener('click', function() {
-    tutorialPopup.style.display = 'flex';
+    tutorialPopup.style.display = DISPLAY_FLEX;
   });
 });
 
@@ -282,6 +283,7 @@ window.addEventListener("load", async function () {
   if(loginRedirected){
     popup.style.display = DISPLAY_NONE;
     overlay.style.display = DISPLAY_NONE;
+    tutorialPopup.style.display = DISPLAY_FLEX;
     if(!accessToken){
       accessToken = await getAccessToken();
       getUserInfo(accessToken.access_token, function (userName) {
@@ -540,6 +542,7 @@ function load_data_from_fs_json(data) {
         querySoundsRequested = default_query;
       }
       const message = `Couldn´t find "${querySoundsRequested}" sounds in Freesound.`;
+      logInfo(message)
       showSnackbar(message + " Please, try again with another sound!");
       throw new Error(message)
     }
