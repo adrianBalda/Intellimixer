@@ -709,7 +709,7 @@ function checkSelectSound(x, y) {
     last_selected_sound_id = idGeneratedAudio
     let sound = new SoundFactoryGeneratedAudios(
         id = idGeneratedAudio,
-        waveform = 'real_sampled_sounds/' + closest,
+        waveform = 'real_sampled_sounds/x_-0.13_y_-0.24.wav',
         x = x,
         y = y,
         latentSpace = multilateralDim,
