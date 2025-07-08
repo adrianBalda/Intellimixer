@@ -767,9 +767,9 @@ function selectSound(selected_sound, spectro_selected_sound, max_value_spectro, 
 }
 
 function finishPlayingSound(sound_id) {
-  let sound = getSoundFromId(sound_id);
-  sound.selected = false;
-  sound.mod_amp = default_point_modulation;
+  // let sound = getSoundFromId(sound_id);
+  // sound.selected = false;
+  // sound.mod_amp = default_point_modulation;
 }
 
 function selectSoundFromId(sound_id) {
