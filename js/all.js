@@ -705,31 +705,45 @@ function checkSelectSound(x, y) {
     //  0.35714608, -3.453202  , -0.7022973 ,  0.9746381 ,  1.4159285 ,
     // -1.7573189 ,  0.7665267 ,  0.4188148 ,  1.1196271 , -0.40932375];
 
-    let latent_space_size = mu_latent_spaces[0].length;
-    let decoder_tensor = tf.tensor(multilateralDim);
-    let predicted_spectogram_tensor = decoderModel.predict(
-      tf.reshape(decoder_tensor, (shape = [1, latent_space_size]))
+    idGeneratedAudio += sounds.length + 1;
+    last_selected_sound_id = idGeneratedAudio
+    let sound = new SoundFactoryGeneratedAudios(
+        id = idGeneratedAudio,
+        waveform = 'real_sampled_sounds/' + closest,
+        x = x,
+        y = y,
+        latentSpace = multilateralDim,
     );
-    let predicted_spectrogram = predicted_spectogram_tensor.arraySync();
-    predicted_spectrogram = predicted_spectrogram[0];
-    convertPredictedSpectrogramIntoAudio(
-      function (audio) {
-        idGeneratedAudio += 1;
-        let sound = new SoundFactoryGeneratedAudios(
-          (id = idGeneratedAudio),
-          (waveform = audio),
-          (x = x),
-          (y = y),
-          (latentSpace = multilateralDim)
-        );
-        sampledSounds.push(sound);
-        playGeneratedSound(sound.waveform);
-        showGeneratedSoundInfo(sound.waveform);
-      },
-      predicted_spectrogram,
-      "2D",
-      512
-    );
+    sampledSounds.push(sound);
+    selectSound(sound);
+
+    // COMENTADO PARA LA DEMO
+    // let latent_space_size = mu_latent_spaces[0].length;
+    // let decoder_tensor = tf.tensor(multilateralDim);
+    // let predicted_spectogram_tensor = decoderModel.predict(
+    //   tf.reshape(decoder_tensor, (shape = [1, latent_space_size]))
+    // );
+    // let predicted_spectrogram = predicted_spectogram_tensor.arraySync();
+    // predicted_spectrogram = predicted_spectrogram[0];
+    // convertPredictedSpectrogramIntoAudio(
+    //   function (audio) {
+    //     idGeneratedAudio += 1;
+    //     let sound = new SoundFactoryGeneratedAudios(
+    //       (id = idGeneratedAudio),
+    //       (waveform = audio),
+    //       (x = x),
+    //       (y = y),
+    //       (latentSpace = multilateralDim)
+    //     );
+    //     sampledSounds.push(sound);
+    //     playGeneratedSound(sound.waveform);
+    //     showGeneratedSoundInfo(sound.waveform);
+    //   },
+    //   predicted_spectrogram,
+    //   "2D",
+    //   512
+    // );
+    // COMENTADO PARA LA DEMO
   }
 }
 
@@ -740,7 +754,8 @@ function selectSound(selected_sound, spectro_selected_sound, max_value_spectro, 
     audio_manager.stopAllBufferNodes();
   }
   if (selected_sound.generated) {
-    playGeneratedSound(selected_sound.waveform);
+    // playGeneratedSound(selected_sound.waveform);
+    audio_manager.loadSound(selected_sound.id, selected_sound.waveform);
     showGeneratedSoundInfo(selected_sound.waveform);
   } else {
     audio_manager.loadSound(selected_sound.id, selected_sound.preview_url);
